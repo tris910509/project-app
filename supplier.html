@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Supplier</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Manajemen Supplier</h1>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addSupplierModal">Tambah Supplier</button>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nama Supplier</th>
+                    <th>Alamat</th>
+                    <th>Kontak</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="supplierTable">
+                <!-- Data akan dimasukkan melalui JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Tambah/Edit Supplier -->
+    <div class="modal fade" id="addSupplierModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah/Edit Supplier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="supplierForm">
+                        <input type="hidden" id="supplierIndex">
+                        <div class="mb-3">
+                            <label for="supplierID" class="form-label">ID Supplier</label>
+                            <input type="text" id="supplierID" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supplierName" class="form-label">Nama Supplier</label>
+                            <input type="text" id="supplierName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supplierAddress" class="form-label">Alamat</label>
+                            <input type="text" id="supplierAddress" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supplierContact" class="form-label">Kontak</label>
+                            <input type="text" id="supplierContact" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simpan data supplier di localStorage
+        const suppliers = JSON.parse(localStorage.getItem('suppliers')) || [];
+
+        const supplierTable = document.getElementById('supplierTable');
+        const supplierForm = document.getElementById('supplierForm');
+        const supplierID = document.getElementById('supplierID');
+        const supplierName = document.getElementById('supplierName');
+        const supplierAddress = document.getElementById('supplierAddress');
+        const supplierContact = document.getElementById('supplierContact');
+        const supplierIndex = document.getElementById('supplierIndex');
+
+        // Render data supplier ke tabel
+        function renderSuppliers() {
+            supplierTable.innerHTML = '';
+            suppliers.forEach((supplier, index) => {
+                supplierTable.innerHTML += `
+                    <tr>
+                        <td>${supplier.id}</td>
+                        <td>${supplier.name}</td>
+                        <td>${supplier.address}</td>
+                        <td>${supplier.contact}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editSupplier(${index})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteSupplier(${index})">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Tambah supplier baru
+        function addSupplier(id, name, address, contact) {
+            suppliers.push({ id, name, address, contact });
+            localStorage.setItem('suppliers', JSON.stringify(suppliers));
+            renderSuppliers();
+        }
+
+        // Edit supplier
+        function editSupplier(index) {
+            const supplier = suppliers[index];
+            supplierIndex.value = index;
+            supplierID.value = supplier.id;
+            supplierName.value = supplier.name;
+            supplierAddress.value = supplier.address;
+            supplierContact.value = supplier.contact;
+
+            const modal = new bootstrap.Modal(document.getElementById('addSupplierModal'));
+            modal.show();
+        }
+
+        // Update supplier
+        function updateSupplier(index, id, name, address, contact) {
+            suppliers[index] = { id, name, address, contact };
+            localStorage.setItem('suppliers', JSON.stringify(suppliers));
+            renderSuppliers();
+        }
+
+        // Hapus supplier
+        function deleteSupplier(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus supplier ini?')) {
+                suppliers.splice(index, 1);
+                localStorage.setItem('suppliers', JSON.stringify(suppliers));
+                renderSuppliers();
+            }
+        }
+
+        // Event listener untuk form
+        supplierForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = supplierID.value;
+            const name = supplierName.value;
+            const address = supplierAddress.value;
+            const contact = supplierContact.value;
+            const index = supplierIndex.value;
+
+            if (index === '') {
+                addSupplier(id, name, address, contact);
+            } else {
+                updateSupplier(index, id, name, address, contact);
+                supplierIndex.value = '';
+            }
+
+            supplierForm.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addSupplierModal'));
+            modal.hide();
+        });
+
+        // Render awal data supplier
+        renderSuppliers();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

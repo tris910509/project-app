@@ -5,31 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Pembayaran</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Detail Pembayaran</h1>
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addPaymentModal">Tambah Pembayaran</button>
+        <h1>Manajemen Detail Pembayaran</h1>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal">Tambah Pembayaran</button>
+            <input type="text" id="searchPayment" class="form-control w-25" placeholder="Cari Pembayaran...">
+        </div>
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID Transaksi</th>
+                    <th>ID Pembayaran</th>
                     <th>Nama Pelanggan</th>
-                    <th>Jumlah Total</th>
-                    <th>Dibayarkan</th>
-                    <th>Sisa</th>
+                    <th>Total Transaksi</th>
+                    <th>Jumlah Dibayar</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody id="paymentTable">
-                <!-- Data akan dimasukkan melalui JavaScript -->
+                <!-- Data pembayaran akan dimasukkan melalui JavaScript -->
             </tbody>
         </table>
     </div>
 
     <!-- Modal Tambah/Edit Pembayaran -->
-    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -40,20 +43,23 @@
                     <form id="paymentForm">
                         <input type="hidden" id="paymentIndex">
                         <div class="mb-3">
-                            <label for="transactionID" class="form-label">ID Transaksi</label>
-                            <input type="text" id="transactionID" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
                             <label for="customerName" class="form-label">Nama Pelanggan</label>
                             <input type="text" id="customerName" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label for="totalAmount" class="form-label">Jumlah Total</label>
-                            <input type="number" id="totalAmount" class="form-control" required>
+                            <label for="totalTransaction" class="form-label">Total Transaksi</label>
+                            <input type="number" id="totalTransaction" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label for="amountPaid" class="form-label">Dibayarkan</label>
+                            <label for="amountPaid" class="form-label">Jumlah Dibayar</label>
                             <input type="number" id="amountPaid" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentStatus" class="form-label">Status Pembayaran</label>
+                            <select id="paymentStatus" class="form-select" required>
+                                <option value="Lunas">Lunas</option>
+                                <option value="Belum Lunas">Belum Lunas</option>
+                            </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </form>
@@ -63,43 +69,54 @@
     </div>
 
     <script>
-        // Simpan data pembayaran di localStorage
+        // Data pembayaran tersimpan di localStorage
         const payments = JSON.parse(localStorage.getItem('payments')) || [];
 
         const paymentTable = document.getElementById('paymentTable');
         const paymentForm = document.getElementById('paymentForm');
-        const transactionID = document.getElementById('transactionID');
+        const searchPayment = document.getElementById('searchPayment');
         const customerName = document.getElementById('customerName');
-        const totalAmount = document.getElementById('totalAmount');
+        const totalTransaction = document.getElementById('totalTransaction');
         const amountPaid = document.getElementById('amountPaid');
+        const paymentStatus = document.getElementById('paymentStatus');
         const paymentIndex = document.getElementById('paymentIndex');
 
+        // Generate ID unik untuk pembayaran
+        function generateUniqueId() {
+            return 'PAY-' + Date.now();
+        }
+
         // Render data pembayaran ke tabel
-        function renderPayments() {
+        function renderPayments(filter = '') {
             paymentTable.innerHTML = '';
-            payments.forEach((payment, index) => {
-                const balance = payment.total - payment.paid;
-                const status = balance === 0 ? 'Lunas' : 'Belum Lunas';
-                paymentTable.innerHTML += `
-                    <tr>
-                        <td>${payment.transactionID}</td>
-                        <td>${payment.customer}</td>
-                        <td>${payment.total}</td>
-                        <td>${payment.paid}</td>
-                        <td>${balance}</td>
-                        <td>${status}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editPayment(${index})">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deletePayment(${index})">Hapus</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            payments
+                .filter(payment => payment.customer.toLowerCase().includes(filter.toLowerCase()))
+                .forEach((payment, index) => {
+                    paymentTable.innerHTML += `
+                        <tr>
+                            <td>${payment.id}</td>
+                            <td>${payment.customer}</td>
+                            <td>Rp ${payment.totalTransaction.toLocaleString()}</td>
+                            <td>Rp ${payment.amountPaid.toLocaleString()}</td>
+                            <td>${payment.status}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editPayment(${index})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deletePayment(${index})">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
         }
 
         // Tambah pembayaran baru
-        function addPayment(transactionID, customer, total, paid) {
-            payments.push({ transactionID, customer, total: parseFloat(total), paid: parseFloat(paid) });
+        function addPayment(customer, totalTransaction, amountPaid, status) {
+            payments.push({
+                id: generateUniqueId(),
+                customer,
+                totalTransaction: Number(totalTransaction),
+                amountPaid: Number(amountPaid),
+                status
+            });
             localStorage.setItem('payments', JSON.stringify(payments));
             renderPayments();
         }
@@ -108,18 +125,24 @@
         function editPayment(index) {
             const payment = payments[index];
             paymentIndex.value = index;
-            transactionID.value = payment.transactionID;
             customerName.value = payment.customer;
-            totalAmount.value = payment.total;
-            amountPaid.value = payment.paid;
+            totalTransaction.value = payment.totalTransaction;
+            amountPaid.value = payment.amountPaid;
+            paymentStatus.value = payment.status;
 
-            const modal = new bootstrap.Modal(document.getElementById('addPaymentModal'));
+            const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
             modal.show();
         }
 
         // Update pembayaran
-        function updatePayment(index, transactionID, customer, total, paid) {
-            payments[index] = { transactionID, customer, total: parseFloat(total), paid: parseFloat(paid) };
+        function updatePayment(index, customer, totalTransaction, amountPaid, status) {
+            payments[index] = {
+                ...payments[index],
+                customer,
+                totalTransaction: Number(totalTransaction),
+                amountPaid: Number(amountPaid),
+                status
+            };
             localStorage.setItem('payments', JSON.stringify(payments));
             renderPayments();
         }
@@ -136,28 +159,34 @@
         // Event listener untuk form
         paymentForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const id = transactionID.value;
             const customer = customerName.value;
-            const total = totalAmount.value;
+            const total = totalTransaction.value;
             const paid = amountPaid.value;
+            const status = paymentStatus.value;
             const index = paymentIndex.value;
 
             if (index === '') {
-                addPayment(id, customer, total, paid);
+                addPayment(customer, total, paid, status);
             } else {
-                updatePayment(index, id, customer, total, paid);
+                updatePayment(index, customer, total, paid, status);
                 paymentIndex.value = '';
             }
 
             paymentForm.reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
             modal.hide();
         });
 
-        // Render awal data pembayaran
+        // Event listener untuk pencarian
+        searchPayment.addEventListener('input', () => {
+            renderPayments(searchPayment.value);
+        });
+
+        // Render pembayaran saat pertama kali halaman dimuat
         renderPayments();
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 </body>
 </html>

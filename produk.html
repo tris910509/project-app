@@ -20,8 +20,8 @@
                     <th>Nama Produk</th>
                     <th>Kategori</th>
                     <th>Suplier</th>
-                    <th>Stok</th>
                     <th>Harga</th>
+                    <th>Stok</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -48,29 +48,19 @@
                         </div>
                         <div class="mb-3">
                             <label for="productCategory" class="form-label">Kategori</label>
-                            <select id="productCategory" class="form-select" required>
-                                <!-- Opsi kategori akan diisi melalui JavaScript -->
-                            </select>
+                            <select id="productCategory" class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="productSupplier" class="form-label">Suplier</label>
-                            <select id="productSupplier" class="form-select" required>
-                                <!-- Opsi suplier akan diisi melalui JavaScript -->
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="productItem" class="form-label">Item Terkait</label>
-                            <select id="productItem" class="form-select" required>
-                                <!-- Opsi item akan diisi melalui JavaScript -->
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="productStock" class="form-label">Stok</label>
-                            <input type="number" id="productStock" class="form-control" min="1" required>
+                            <select id="productSupplier" class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="productPrice" class="form-label">Harga</label>
-                            <input type="number" id="productPrice" class="form-control" min="0" required>
+                            <input type="number" id="productPrice" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productStock" class="form-label">Stok</label>
+                            <input type="number" id="productStock" class="form-control" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </form>
@@ -80,11 +70,10 @@
     </div>
 
     <script>
-        // Simpan data di localStorage
+        // Dummy data untuk kategori dan suplier
+        const categories = JSON.parse(localStorage.getItem('categories')) || [];
+        const suppliers = JSON.parse(localStorage.getItem('suppliers')) || [];
         const products = JSON.parse(localStorage.getItem('products')) || [];
-        const categories = JSON.parse(localStorage.getItem('categories')) || []; // Data kategori
-        const suppliers = JSON.parse(localStorage.getItem('suppliers')) || []; // Data suplier
-        const items = JSON.parse(localStorage.getItem('items')) || []; // Data item
 
         const productTable = document.getElementById('productTable');
         const productForm = document.getElementById('productForm');
@@ -92,14 +81,29 @@
         const productName = document.getElementById('productName');
         const productCategory = document.getElementById('productCategory');
         const productSupplier = document.getElementById('productSupplier');
-        const productItem = document.getElementById('productItem');
-        const productStock = document.getElementById('productStock');
         const productPrice = document.getElementById('productPrice');
+        const productStock = document.getElementById('productStock');
         const productIndex = document.getElementById('productIndex');
 
         // Generate ID unik untuk produk
         function generateUniqueId() {
-            return 'PROD-' + Date.now();
+            return 'PRD-' + Date.now();
+        }
+
+        // Render data kategori ke dropdown
+        function renderCategories() {
+            productCategory.innerHTML = '';
+            categories.forEach(category => {
+                productCategory.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+            });
+        }
+
+        // Render data suplier ke dropdown
+        function renderSuppliers() {
+            productSupplier.innerHTML = '';
+            suppliers.forEach(supplier => {
+                productSupplier.innerHTML += `<option value="${supplier.id}">${supplier.name}</option>`;
+            });
         }
 
         // Render data produk ke tabel
@@ -108,14 +112,17 @@
             products
                 .filter(product => product.name.toLowerCase().includes(filter.toLowerCase()))
                 .forEach((product, index) => {
+                    const category = categories.find(cat => cat.id === product.categoryId)?.name || 'Tidak Ditemukan';
+                    const supplier = suppliers.find(sup => sup.id === product.supplierId)?.name || 'Tidak Ditemukan';
+
                     productTable.innerHTML += `
                         <tr>
                             <td>${product.id}</td>
                             <td>${product.name}</td>
-                            <td>${product.category}</td>
-                            <td>${product.supplier}</td>
+                            <td>${category}</td>
+                            <td>${supplier}</td>
+                            <td>${product.price}</td>
                             <td>${product.stock}</td>
-                            <td>Rp ${product.price.toLocaleString()}</td>
                             <td>
                                 <button class="btn btn-warning btn-sm" onclick="editProduct(${index})">Edit</button>
                                 <button class="btn btn-danger btn-sm" onclick="deleteProduct(${index})">Hapus</button>
@@ -125,24 +132,15 @@
                 });
         }
 
-        // Render opsi kategori, suplier, dan item
-        function renderOptions() {
-            productCategory.innerHTML = categories.map(category => `<option value="${category.name}">${category.name}</option>`).join('');
-            productSupplier.innerHTML = suppliers.map(supplier => `<option value="${supplier.name}">${supplier.name}</option>`).join('');
-            productItem.innerHTML = items.map(item => `<option value="${item.name}">${item.name}</option>`).join('');
-        }
-
         // Tambah produk baru
-        function addProduct(name, category, supplier, item, stock, price) {
+        function addProduct(name, categoryId, supplierId, price, stock) {
             products.push({
                 id: generateUniqueId(),
                 name,
-                category,
-                supplier,
-                item,
-                stock,
+                categoryId,
+                supplierId,
                 price,
-                createdAt: new Date().toISOString()
+                stock
             });
             localStorage.setItem('products', JSON.stringify(products));
             renderProducts();
@@ -153,19 +151,18 @@
             const product = products[index];
             productIndex.value = index;
             productName.value = product.name;
-            productCategory.value = product.category;
-            productSupplier.value = product.supplier;
-            productItem.value = product.item;
-            productStock.value = product.stock;
+            productCategory.value = product.categoryId;
+            productSupplier.value = product.supplierId;
             productPrice.value = product.price;
+            productStock.value = product.stock;
 
             const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
             modal.show();
         }
 
         // Update produk
-        function updateProduct(index, name, category, supplier, item, stock, price) {
-            products[index] = { ...products[index], name, category, supplier, item, stock, price };
+        function updateProduct(index, name, categoryId, supplierId, price, stock) {
+            products[index] = { ...products[index], name, categoryId, supplierId, price, stock };
             localStorage.setItem('products', JSON.stringify(products));
             renderProducts();
         }
@@ -183,17 +180,16 @@
         productForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const name = productName.value;
-            const category = productCategory.value;
-            const supplier = productSupplier.value;
-            const item = productItem.value;
-            const stock = productStock.value;
+            const categoryId = productCategory.value;
+            const supplierId = productSupplier.value;
             const price = productPrice.value;
+            const stock = productStock.value;
             const index = productIndex.value;
 
             if (index === '') {
-                addProduct(name, category, supplier, item, parseInt(stock), parseInt(price));
+                addProduct(name, categoryId, supplierId, price, stock);
             } else {
-                updateProduct(index, name, category, supplier, item, parseInt(stock), parseInt(price));
+                updateProduct(index, name, categoryId, supplierId, price, stock);
                 productIndex.value = '';
             }
 
@@ -207,8 +203,9 @@
             renderProducts(searchProduct.value);
         });
 
-        // Render awal
-        renderOptions();
+        // Inisialisasi dropdown dan render produk
+        renderCategories();
+        renderSuppliers();
         renderProducts();
     </script>
 

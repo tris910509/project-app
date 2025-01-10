@@ -9,21 +9,21 @@
 <body>
     <div class="container mt-5">
         <h1>Manajemen Item</h1>
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addItemModal">Tambah Item</button>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">Tambah Item</button>
+            <input type="text" id="searchItem" class="form-control w-25" placeholder="Cari Item...">
+        </div>
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>ID Item</th>
                     <th>Nama Item</th>
-                    <th>Kategori</th>
-                    <th>Harga</th>
-                    <th>Stok</th>
-                    <th>Supplier</th>
+                    <th>Deskripsi</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody id="itemTable">
-                <!-- Data akan dimasukkan melalui JavaScript -->
+                <!-- Data item akan dimasukkan melalui JavaScript -->
             </tbody>
         </table>
     </div>
@@ -40,28 +40,12 @@
                     <form id="itemForm">
                         <input type="hidden" id="itemIndex">
                         <div class="mb-3">
-                            <label for="itemID" class="form-label">ID Item</label>
-                            <input type="text" id="itemID" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
                             <label for="itemName" class="form-label">Nama Item</label>
                             <input type="text" id="itemName" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label for="itemCategory" class="form-label">Kategori</label>
-                            <input type="text" id="itemCategory" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="itemPrice" class="form-label">Harga</label>
-                            <input type="number" id="itemPrice" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="itemStock" class="form-label">Stok</label>
-                            <input type="number" id="itemStock" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="itemSupplier" class="form-label">Supplier</label>
-                            <input type="text" id="itemSupplier" class="form-control" required>
+                            <label for="itemDescription" class="form-label">Deskripsi</label>
+                            <textarea id="itemDescription" class="form-control" rows="2"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </form>
@@ -76,38 +60,39 @@
 
         const itemTable = document.getElementById('itemTable');
         const itemForm = document.getElementById('itemForm');
-        const itemID = document.getElementById('itemID');
+        const searchItem = document.getElementById('searchItem');
         const itemName = document.getElementById('itemName');
-        const itemCategory = document.getElementById('itemCategory');
-        const itemPrice = document.getElementById('itemPrice');
-        const itemStock = document.getElementById('itemStock');
-        const itemSupplier = document.getElementById('itemSupplier');
+        const itemDescription = document.getElementById('itemDescription');
         const itemIndex = document.getElementById('itemIndex');
 
+        // Generate ID unik untuk item
+        function generateUniqueId() {
+            return 'ITEM-' + Date.now();
+        }
+
         // Render data item ke tabel
-        function renderItems() {
+        function renderItems(filter = '') {
             itemTable.innerHTML = '';
-            items.forEach((item, index) => {
-                itemTable.innerHTML += `
-                    <tr>
-                        <td>${item.id}</td>
-                        <td>${item.name}</td>
-                        <td>${item.category}</td>
-                        <td>${item.price}</td>
-                        <td>${item.stock}</td>
-                        <td>${item.supplier}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editItem(${index})">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteItem(${index})">Hapus</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            items
+                .filter(item => item.name.toLowerCase().includes(filter.toLowerCase()))
+                .forEach((item, index) => {
+                    itemTable.innerHTML += `
+                        <tr>
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${item.description || '-'}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editItem(${index})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteItem(${index})">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
         }
 
         // Tambah item baru
-        function addItem(id, name, category, price, stock, supplier) {
-            items.push({ id, name, category, price, stock, supplier });
+        function addItem(name, description) {
+            items.push({ id: generateUniqueId(), name, description });
             localStorage.setItem('items', JSON.stringify(items));
             renderItems();
         }
@@ -116,20 +101,16 @@
         function editItem(index) {
             const item = items[index];
             itemIndex.value = index;
-            itemID.value = item.id;
             itemName.value = item.name;
-            itemCategory.value = item.category;
-            itemPrice.value = item.price;
-            itemStock.value = item.stock;
-            itemSupplier.value = item.supplier;
+            itemDescription.value = item.description;
 
             const modal = new bootstrap.Modal(document.getElementById('addItemModal'));
             modal.show();
         }
 
         // Update item
-        function updateItem(index, id, name, category, price, stock, supplier) {
-            items[index] = { id, name, category, price, stock, supplier };
+        function updateItem(index, name, description) {
+            items[index] = { ...items[index], name, description };
             localStorage.setItem('items', JSON.stringify(items));
             renderItems();
         }
@@ -146,24 +127,25 @@
         // Event listener untuk form
         itemForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const id = itemID.value;
             const name = itemName.value;
-            const category = itemCategory.value;
-            const price = parseFloat(itemPrice.value);
-            const stock = parseInt(itemStock.value);
-            const supplier = itemSupplier.value;
+            const description = itemDescription.value;
             const index = itemIndex.value;
 
             if (index === '') {
-                addItem(id, name, category, price, stock, supplier);
+                addItem(name, description);
             } else {
-                updateItem(index, id, name, category, price, stock, supplier);
+                updateItem(index, name, description);
                 itemIndex.value = '';
             }
 
             itemForm.reset();
             const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
             modal.hide();
+        });
+
+        // Event listener untuk pencarian
+        searchItem.addEventListener('input', () => {
+            renderItems(searchItem.value);
         });
 
         // Render awal data item

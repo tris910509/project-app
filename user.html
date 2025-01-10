@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Manajemen User</h1>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addUserModal">Tambah User</button>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama</th>
+                    <th>Role</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+                <!-- Data akan dimasukkan melalui JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Tambah/Edit -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah/Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userIndex">
+                        <div class="mb-3">
+                            <label for="userName" class="form-label">Nama</label>
+                            <input type="text" id="userName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userRole" class="form-label">Role</label>
+                            <select id="userRole" class="form-select" required>
+                                <option value="Admin">Admin</option>
+                                <option value="Kasir">Kasir</option>
+                                <option value="Operator">Operator</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simpan data user di localStorage
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+
+        const userTable = document.getElementById('userTable');
+        const userForm = document.getElementById('userForm');
+        const userName = document.getElementById('userName');
+        const userRole = document.getElementById('userRole');
+        const userIndex = document.getElementById('userIndex');
+
+        function renderUsers() {
+            userTable.innerHTML = '';
+            users.forEach((user, index) => {
+                userTable.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${user.name}</td>
+                        <td>${user.role}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editUser(${index})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteUser(${index})">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function addUser(name, role) {
+            users.push({ name, role });
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+        }
+
+        function editUser(index) {
+            const user = users[index];
+            userIndex.value = index;
+            userName.value = user.name;
+            userRole.value = user.role;
+            const modal = new bootstrap.Modal(document.getElementById('addUserModal'));
+            modal.show();
+        }
+
+        function updateUser(index, name, role) {
+            users[index] = { name, role };
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+        }
+
+        function deleteUser(index) {
+            users.splice(index, 1);
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+        }
+
+        userForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = userName.value;
+            const role = userRole.value;
+            const index = userIndex.value;
+
+            if (index === '') {
+                addUser(name, role);
+            } else {
+                updateUser(index, name, role);
+                userIndex.value = '';
+            }
+
+            userForm.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
+            modal.hide();
+        });
+
+        // Render awal
+        renderUsers();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

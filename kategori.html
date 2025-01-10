@@ -9,17 +9,21 @@
 <body>
     <div class="container mt-5">
         <h1>Manajemen Kategori</h1>
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Tambah Kategori</button>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Tambah Kategori</button>
+            <input type="text" id="searchCategory" class="form-control w-25" placeholder="Cari Kategori...">
+        </div>
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Nama Kategori</th>
+                    <th>Deskripsi</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody id="categoryTable">
-                <!-- Data akan dimasukkan melalui JavaScript -->
+                <!-- Data kategori akan dimasukkan melalui JavaScript -->
             </tbody>
         </table>
     </div>
@@ -36,12 +40,12 @@
                     <form id="categoryForm">
                         <input type="hidden" id="categoryIndex">
                         <div class="mb-3">
-                            <label for="categoryID" class="form-label">ID Kategori</label>
-                            <input type="text" id="categoryID" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
                             <label for="categoryName" class="form-label">Nama Kategori</label>
                             <input type="text" id="categoryName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryDescription" class="form-label">Deskripsi</label>
+                            <textarea id="categoryDescription" class="form-control" rows="2"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </form>
@@ -51,52 +55,67 @@
     </div>
 
     <script>
+        // Simpan data kategori di localStorage
         const categories = JSON.parse(localStorage.getItem('categories')) || [];
 
         const categoryTable = document.getElementById('categoryTable');
         const categoryForm = document.getElementById('categoryForm');
-        const categoryID = document.getElementById('categoryID');
+        const searchCategory = document.getElementById('searchCategory');
         const categoryName = document.getElementById('categoryName');
+        const categoryDescription = document.getElementById('categoryDescription');
         const categoryIndex = document.getElementById('categoryIndex');
 
-        function renderCategories() {
-            categoryTable.innerHTML = '';
-            categories.forEach((category, index) => {
-                categoryTable.innerHTML += `
-                    <tr>
-                        <td>${category.id}</td>
-                        <td>${category.name}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editCategory(${index})">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteCategory(${index})">Hapus</button>
-                        </td>
-                    </tr>
-                `;
-            });
+        // Generate ID unik
+        function generateUniqueId() {
+            return 'CAT-' + Date.now();
         }
 
-        function addCategory(id, name) {
-            categories.push({ id, name });
+        // Render data kategori ke tabel
+        function renderCategories(filter = '') {
+            categoryTable.innerHTML = '';
+            categories
+                .filter(category => category.name.toLowerCase().includes(filter.toLowerCase()))
+                .forEach((category, index) => {
+                    categoryTable.innerHTML += `
+                        <tr>
+                            <td>${category.id}</td>
+                            <td>${category.name}</td>
+                            <td>${category.description || '-'}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editCategory(${index})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteCategory(${index})">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        // Tambah kategori baru
+        function addCategory(name, description) {
+            categories.push({ id: generateUniqueId(), name, description });
             localStorage.setItem('categories', JSON.stringify(categories));
             renderCategories();
         }
 
+        // Edit kategori
         function editCategory(index) {
             const category = categories[index];
             categoryIndex.value = index;
-            categoryID.value = category.id;
             categoryName.value = category.name;
+            categoryDescription.value = category.description;
 
             const modal = new bootstrap.Modal(document.getElementById('addCategoryModal'));
             modal.show();
         }
 
-        function updateCategory(index, id, name) {
-            categories[index] = { id, name };
+        // Update kategori
+        function updateCategory(index, name, description) {
+            categories[index] = { ...categories[index], name, description };
             localStorage.setItem('categories', JSON.stringify(categories));
             renderCategories();
         }
 
+        // Hapus kategori
         function deleteCategory(index) {
             if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
                 categories.splice(index, 1);
@@ -105,16 +124,17 @@
             }
         }
 
+        // Event listener untuk form
         categoryForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const id = categoryID.value;
             const name = categoryName.value;
+            const description = categoryDescription.value;
             const index = categoryIndex.value;
 
             if (index === '') {
-                addCategory(id, name);
+                addCategory(name, description);
             } else {
-                updateCategory(index, id, name);
+                updateCategory(index, name, description);
                 categoryIndex.value = '';
             }
 
@@ -123,6 +143,12 @@
             modal.hide();
         });
 
+        // Event listener untuk pencarian
+        searchCategory.addEventListener('input', () => {
+            renderCategories(searchCategory.value);
+        });
+
+        // Render awal data kategori
         renderCategories();
     </script>
 

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Transaksi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Manajemen Transaksi</h1>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addTransactionModal">Tambah Transaksi</button>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID Transaksi</th>
+                    <th>Nama Pelanggan</th>
+                    <th>Tanggal</th>
+                    <th>Daftar Item</th>
+                    <th>Total</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="transactionTable">
+                <!-- Data akan dimasukkan melalui JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Tambah/Edit Transaksi -->
+    <div class="modal fade" id="addTransactionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah/Edit Transaksi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transactionForm">
+                        <input type="hidden" id="transactionIndex">
+                        <div class="mb-3">
+                            <label for="transactionID" class="form-label">ID Transaksi</label>
+                            <input type="text" id="transactionID" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerName" class="form-label">Nama Pelanggan</label>
+                            <input type="text" id="customerName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transactionDate" class="form-label">Tanggal Transaksi</label>
+                            <input type="date" id="transactionDate" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transactionItems" class="form-label">Daftar Item</label>
+                            <textarea id="transactionItems" class="form-control" rows="3" placeholder="Masukkan item dalam format: Item1|2|5000 (Nama|Jumlah|Harga)"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simpan data transaksi di localStorage
+        const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+        const transactionTable = document.getElementById('transactionTable');
+        const transactionForm = document.getElementById('transactionForm');
+        const transactionID = document.getElementById('transactionID');
+        const customerName = document.getElementById('customerName');
+        const transactionDate = document.getElementById('transactionDate');
+        const transactionItems = document.getElementById('transactionItems');
+        const transactionIndex = document.getElementById('transactionIndex');
+
+        // Render data transaksi ke tabel
+        function renderTransactions() {
+            transactionTable.innerHTML = '';
+            transactions.forEach((transaction, index) => {
+                const itemDetails = transaction.items.map(item => 
+                    `${item.name} (${item.quantity} x ${item.price})`
+                ).join(', ');
+                transactionTable.innerHTML += `
+                    <tr>
+                        <td>${transaction.id}</td>
+                        <td>${transaction.customer}</td>
+                        <td>${transaction.date}</td>
+                        <td>${itemDetails}</td>
+                        <td>${transaction.total}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editTransaction(${index})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${index})">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Tambah transaksi baru
+        function addTransaction(id, customer, date, items) {
+            const parsedItems = parseItems(items);
+            const total = calculateTotal(parsedItems);
+            transactions.push({ id, customer, date, items: parsedItems, total });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            renderTransactions();
+        }
+
+        // Edit transaksi
+        function editTransaction(index) {
+            const transaction = transactions[index];
+            transactionIndex.value = index;
+            transactionID.value = transaction.id;
+            customerName.value = transaction.customer;
+            transactionDate.value = transaction.date;
+            transactionItems.value = transaction.items.map(item => 
+                `${item.name}|${item.quantity}|${item.price}`
+            ).join('\n');
+
+            const modal = new bootstrap.Modal(document.getElementById('addTransactionModal'));
+            modal.show();
+        }
+
+        // Update transaksi
+        function updateTransaction(index, id, customer, date, items) {
+            const parsedItems = parseItems(items);
+            const total = calculateTotal(parsedItems);
+            transactions[index] = { id, customer, date, items: parsedItems, total };
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            renderTransactions();
+        }
+
+        // Hapus transaksi
+        function deleteTransaction(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                transactions.splice(index, 1);
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                renderTransactions();
+            }
+        }
+
+        // Parse daftar item
+        function parseItems(items) {
+            return items.split('\n').map(line => {
+                const [name, quantity, price] = line.split('|');
+                return { name, quantity: parseInt(quantity), price: parseFloat(price) };
+            });
+        }
+
+        // Hitung total pembayaran
+        function calculateTotal(items) {
+            return items.reduce((total, item) => total + item.quantity * item.price, 0);
+        }
+
+        // Event listener untuk form
+        transactionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = transactionID.value;
+            const customer = customerName.value;
+            const date = transactionDate.value;
+            const items = transactionItems.value;
+            const index = transactionIndex.value;
+
+            if (index === '') {
+                addTransaction(id, customer, date, items);
+            } else {
+                updateTransaction(index, id, customer, date, items);
+                transactionIndex.value = '';
+            }
+
+            transactionForm.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addTransactionModal'));
+            modal.hide();
+        });
+
+        // Render awal data transaksi
+        renderTransactions();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

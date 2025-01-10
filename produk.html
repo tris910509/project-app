@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Produk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Manajemen Produk</h1>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">Tambah Produk</button>
+            <input type="text" id="searchProduct" class="form-control w-25" placeholder="Cari Produk...">
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID Produk</th>
+                    <th>Nama Produk</th>
+                    <th>Kategori</th>
+                    <th>Suplier</th>
+                    <th>Stok</th>
+                    <th>Harga</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="productTable">
+                <!-- Data produk akan dimasukkan melalui JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Tambah/Edit Produk -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah/Edit Produk</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm">
+                        <input type="hidden" id="productIndex">
+                        <div class="mb-3">
+                            <label for="productName" class="form-label">Nama Produk</label>
+                            <input type="text" id="productName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productCategory" class="form-label">Kategori</label>
+                            <select id="productCategory" class="form-select" required>
+                                <!-- Opsi kategori akan diisi melalui JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productSupplier" class="form-label">Suplier</label>
+                            <select id="productSupplier" class="form-select" required>
+                                <!-- Opsi suplier akan diisi melalui JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productItem" class="form-label">Item Terkait</label>
+                            <select id="productItem" class="form-select" required>
+                                <!-- Opsi item akan diisi melalui JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productStock" class="form-label">Stok</label>
+                            <input type="number" id="productStock" class="form-control" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productPrice" class="form-label">Harga</label>
+                            <input type="number" id="productPrice" class="form-control" min="0" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simpan data di localStorage
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        const categories = JSON.parse(localStorage.getItem('categories')) || []; // Data kategori
+        const suppliers = JSON.parse(localStorage.getItem('suppliers')) || []; // Data suplier
+        const items = JSON.parse(localStorage.getItem('items')) || []; // Data item
+
+        const productTable = document.getElementById('productTable');
+        const productForm = document.getElementById('productForm');
+        const searchProduct = document.getElementById('searchProduct');
+        const productName = document.getElementById('productName');
+        const productCategory = document.getElementById('productCategory');
+        const productSupplier = document.getElementById('productSupplier');
+        const productItem = document.getElementById('productItem');
+        const productStock = document.getElementById('productStock');
+        const productPrice = document.getElementById('productPrice');
+        const productIndex = document.getElementById('productIndex');
+
+        // Generate ID unik untuk produk
+        function generateUniqueId() {
+            return 'PROD-' + Date.now();
+        }
+
+        // Render data produk ke tabel
+        function renderProducts(filter = '') {
+            productTable.innerHTML = '';
+            products
+                .filter(product => product.name.toLowerCase().includes(filter.toLowerCase()))
+                .forEach((product, index) => {
+                    productTable.innerHTML += `
+                        <tr>
+                            <td>${product.id}</td>
+                            <td>${product.name}</td>
+                            <td>${product.category}</td>
+                            <td>${product.supplier}</td>
+                            <td>${product.stock}</td>
+                            <td>Rp ${product.price.toLocaleString()}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editProduct(${index})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteProduct(${index})">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        // Render opsi kategori, suplier, dan item
+        function renderOptions() {
+            productCategory.innerHTML = categories.map(category => `<option value="${category.name}">${category.name}</option>`).join('');
+            productSupplier.innerHTML = suppliers.map(supplier => `<option value="${supplier.name}">${supplier.name}</option>`).join('');
+            productItem.innerHTML = items.map(item => `<option value="${item.name}">${item.name}</option>`).join('');
+        }
+
+        // Tambah produk baru
+        function addProduct(name, category, supplier, item, stock, price) {
+            products.push({
+                id: generateUniqueId(),
+                name,
+                category,
+                supplier,
+                item,
+                stock,
+                price,
+                createdAt: new Date().toISOString()
+            });
+            localStorage.setItem('products', JSON.stringify(products));
+            renderProducts();
+        }
+
+        // Edit produk
+        function editProduct(index) {
+            const product = products[index];
+            productIndex.value = index;
+            productName.value = product.name;
+            productCategory.value = product.category;
+            productSupplier.value = product.supplier;
+            productItem.value = product.item;
+            productStock.value = product.stock;
+            productPrice.value = product.price;
+
+            const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+            modal.show();
+        }
+
+        // Update produk
+        function updateProduct(index, name, category, supplier, item, stock, price) {
+            products[index] = { ...products[index], name, category, supplier, item, stock, price };
+            localStorage.setItem('products', JSON.stringify(products));
+            renderProducts();
+        }
+
+        // Hapus produk
+        function deleteProduct(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+                products.splice(index, 1);
+                localStorage.setItem('products', JSON.stringify(products));
+                renderProducts();
+            }
+        }
+
+        // Event listener untuk form
+        productForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = productName.value;
+            const category = productCategory.value;
+            const supplier = productSupplier.value;
+            const item = productItem.value;
+            const stock = productStock.value;
+            const price = productPrice.value;
+            const index = productIndex.value;
+
+            if (index === '') {
+                addProduct(name, category, supplier, item, parseInt(stock), parseInt(price));
+            } else {
+                updateProduct(index, name, category, supplier, item, parseInt(stock), parseInt(price));
+                productIndex.value = '';
+            }
+
+            productForm.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addProductModal'));
+            modal.hide();
+        });
+
+        // Event listener untuk pencarian
+        searchProduct.addEventListener('input', () => {
+            renderProducts(searchProduct.value);
+        });
+
+        // Render awal
+        renderOptions();
+        renderProducts();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

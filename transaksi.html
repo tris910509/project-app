@@ -9,6 +9,49 @@
 </head>
 <body>
     <div class="container mt-5">
+        <h1 class="text-center mb-4"><i class="fas fa-shopping-cart"></i> Kelola Transaksi</h1>
+        <div id="alertContainer"></div>
+        <form id="transaksiForm" class="mb-4">
+            <div class="mb-3">
+                <label for="pelanggan" class="form-label">Pelanggan</label>
+                <select class="form-select" id="pelanggan" required>
+                    <option value="" disabled selected>Pilih pelanggan</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="produk" class="form-label">Produk</label>
+                <select class="form-select" id="produk" required>
+                    <option value="" disabled selected>Pilih produk</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="jumlah" class="form-label">Jumlah</label>
+                <input type="number" class="form-control" id="jumlah" placeholder="Masukkan jumlah" required>
+            </div>
+            <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> Tambah ke Keranjang</button>
+        </form>
+        <h3>Keranjang</h3>
+        <table class="table table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Produk</th>
+                    <th>Jumlah</th>
+                    <th>Harga</th>
+                    <th>Total</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="keranjangTable">
+                <!-- Data keranjang akan ditampilkan di sini -->
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-between align-items-center">
+            <h4>Total Bayar: <span id="totalBayar">0</span></h4>
+            <button class="btn btn-primary" onclick="prosesPembayaran()"><i class="fas fa-cash-register"></i> Proses Pembayaran</button>
+        </div>
+    </div>
+    
+    <div class="container mt-5">
         <h1 class="text-center mb-4"><i class="fas fa-exchange-alt"></i> Fitur Transaksi</h1>
 
         <!-- Tabel Transaksi -->

@@ -1,77 +1,77 @@
-// Dropdown pelanggan berdasarkan peran
+let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
+let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
+let keranjang = [];
+let transaksiData = JSON.parse(localStorage.getItem("transaksiData")) || [];
+
+// Peran pelanggan
 document.getElementById("peran").addEventListener("change", function () {
     const peran = this.value;
-    const inputManual = document.getElementById("inputManual");
-    const inputHandphone = document.getElementById("inputHandphone");
-    const inputAlamat = document.getElementById("inputAlamat");
-    const dropdownPelanggan = document.getElementById("dropdownPelanggan");
+    const pelangganInput = document.getElementById("pelangganInput");
+    const filterButton = document.getElementById("filterPelanggan");
 
     if (peran === "Umum") {
-        inputManual.classList.remove("d-none");
-        inputHandphone.classList.remove("d-none");
-        inputAlamat.classList.remove("d-none");
-        dropdownPelanggan.classList.add("d-none");
+        pelangganInput.placeholder = "Masukkan Nama Pelanggan Baru";
+        filterButton.disabled = true;
     } else {
-        inputManual.classList.add("d-none");
-        inputHandphone.classList.add("d-none");
-        inputAlamat.classList.add("d-none");
-        dropdownPelanggan.classList.remove("d-none");
-        muatDropdownPelanggan(peran);
+        pelangganInput.placeholder = "Masukkan ID/Nama Pelanggan";
+        filterButton.disabled = false;
     }
 });
 
-// Muat dropdown pelanggan sesuai peran
-function muatDropdownPelanggan(peran) {
-    const pelangganDropdown = document.getElementById("pelanggan");
-    pelangganDropdown.innerHTML = `<option value="" selected>Pilih Pelanggan</option>`;
-
-    const filteredPelanggan = pelangganData.filter((pelanggan) => pelanggan.peran === peran);
-    filteredPelanggan.forEach((pelanggan) => {
-        pelangganDropdown.innerHTML += `<option value="${pelanggan.id}">${pelanggan.nama}</option>`;
-    });
-}
-
-// Tambah ke fitur pelanggan jika peran Umum
-function tambahPelangganManual() {
-    const nama = document.getElementById("namaPelanggan").value.trim();
-    const noHandphone = document.getElementById("noHandphone").value.trim();
-    const alamat = document.getElementById("alamatPelanggan").value.trim();
-
-    if (!nama || !noHandphone || !alamat) {
-        alert("Harap lengkapi data pelanggan!");
-        return null;
-    }
-
+// Tambah pelanggan baru untuk peran "Umum"
+function tambahPelangganBaru(nama) {
     const pelangganBaru = {
-        id: `PLGN-${Date.now()}`,
+        id: `PLG-${Date.now()}`,
         nama,
-        noHandphone,
-        alamat,
-        peran: "Umum",
     };
-
     pelangganData.push(pelangganBaru);
     localStorage.setItem("pelangganData", JSON.stringify(pelangganData));
     return pelangganBaru;
 }
 
-// Selesaikan transaksi dengan validasi peran
+// Filter pelanggan untuk peran "CosMem" dan "PelMem"
+document.getElementById("filterPelanggan").addEventListener("click", function () {
+    const input = document.getElementById("pelangganInput").value.toLowerCase();
+    const pelanggan = pelangganData.find(
+        (p) => p.id.toLowerCase() === input || p.nama.toLowerCase().includes(input)
+    );
+
+    if (pelanggan) {
+        alert(`Pelanggan ditemukan: ${pelanggan.nama}`);
+    } else {
+        alert("Pelanggan tidak ditemukan!");
+    }
+});
+
+// Selesaikan transaksi
 document.getElementById("selesaikanTransaksi").addEventListener("click", function () {
     const peran = document.getElementById("peran").value;
-
+    const pelangganInput = document.getElementById("pelangganInput").value;
     let pelanggan;
+
     if (peran === "Umum") {
-        pelanggan = tambahPelangganManual();
-        if (!pelanggan) return;
+        pelanggan = tambahPelangganBaru(pelangganInput);
     } else {
-        const pelangganId = document.getElementById("pelanggan").value;
-        if (!pelangganId) {
-            alert("Pilih pelanggan!");
+        pelanggan = pelangganData.find(
+            (p) => p.id.toLowerCase() === pelangganInput.toLowerCase() || p.nama.toLowerCase().includes(pelangganInput)
+        );
+        if (!pelanggan) {
+            alert("Pelanggan tidak ditemukan!");
             return;
         }
-        pelanggan = pelangganData.find((p) => p.id === pelangganId);
     }
 
-    // Lanjutkan proses transaksi
-    console.log("Proses transaksi untuk pelanggan:", pelanggan);
+    // Simpan transaksi
+    const total = keranjang.reduce((sum, item) => sum + item.total, 0);
+    transaksiData.push({
+        id: `TRX-${Date.now()}`,
+        tanggal: new Date().toISOString().split("T")[0],
+        pelangganId: pelanggan.id,
+        pelanggan: pelanggan.nama,
+        total,
+        status: "Lunas",
+        items: keranjang,
+    });
+    localStorage.setItem("transaksiData", JSON.stringify(transaksiData));
+    alert("Transaksi selesai!");
 });

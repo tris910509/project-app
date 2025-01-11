@@ -3,32 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proses Pembayaran</title>
+    <title>Fitur Pembayaran</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center mb-4"><i class="fas fa-credit-card"></i> Pembayaran</h1>
-        <div id="alertContainer"></div>
-        
-        <div class="mb-3">
-            <label for="transaksiSelect" class="form-label">Pilih Transaksi</label>
-            <select class="form-select" id="transaksiSelect" required>
-                <option value="" disabled selected>Pilih transaksi</option>
-            </select>
-        </div>
-        
-        <div class="mb-3">
-            <label for="jumlahBayar" class="form-label">Jumlah Bayar</label>
-            <input type="number" class="form-control" id="jumlahBayar" placeholder="Masukkan jumlah bayar" required>
-        </div>
+        <h1 class="text-center mb-4"><i class="fas fa-wallet"></i> Fitur Pembayaran</h1>
 
-        <button class="btn btn-success" onclick="prosesPembayaran()"><i class="fas fa-check-circle"></i> Konfirmasi Pembayaran</button>
+        <!-- Form Tambah Pembayaran -->
+        <form id="formPembayaran" onsubmit="return tambahPembayaran(event)">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="idPembayaran" class="form-label">ID Pembayaran</label>
+                    <input type="text" class="form-control" id="idPembayaran" readonly>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="idTransaksi" class="form-label">ID Transaksi</label>
+                    <input type="text" class="form-control" id="idTransaksi" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="namaTransaksi" class="form-label">Nama Transaksi</label>
+                    <input type="text" class="form-control" id="namaTransaksi" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="totalHarusDibayar" class="form-label">Total Harus Dibayar</label>
+                    <input type="number" class="form-control" id="totalHarusDibayar" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="statusPembayaran" class="form-label">Status</label>
+                    <select class="form-select" id="statusPembayaran" required>
+                        <option value="">-- Pilih Status --</option>
+                        <option value="Lunas">Lunas</option>
+                        <option value="Belum Bayar">Belum Bayar</option>
+                        <option value="Belum Konfirmasi">Belum Konfirmasi</option>
+                        <option value="Proses">Proses</option>
+                        <option value="Konfirmasi">Konfirmasi</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Tambah Pembayaran</button>
+        </form>
 
-        <div id="statusPembayaran" class="mt-4">
-            <!-- Status pembayaran akan ditampilkan di sini -->
-        </div>
+        <!-- Tabel Data Pembayaran -->
+        <h3 class="mt-5">Daftar Pembayaran</h3>
+        <table class="table table-striped" id="tabelPembayaran">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID Pembayaran</th>
+                    <th>ID Transaksi</th>
+                    <th>Nama Transaksi</th>
+                    <th>Total Harus Dibayar</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data akan ditampilkan di sini -->
+            </tbody>
+        </table>
     </div>
 
     <script src="js/pembayaran.js"></script>

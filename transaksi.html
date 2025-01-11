@@ -9,6 +9,87 @@
 </head>
 <body>
     <div class="container mt-5">
+        <h1 class="text-center mb-4"><i class="fas fa-shopping-cart"></i> Formulir Transaksi</h1>
+        <div id="alertContainer"></div>
+
+        <form id="formTransaksi" onsubmit="return simpanTransaksi(event)">
+            <div class="mb-3">
+                <label for="peranPelanggan" class="form-label">Peran Pelanggan</label>
+                <select class="form-select" id="peranPelanggan" onchange="ubahFormPelanggan()" required>
+                    <option value="Umum">Umum</option>
+                    <option value="CosMen">CosMen</option>
+                    <option value="PelMem">PelMem</option>
+                </select>
+            </div>
+
+            <div id="formManual" class="d-none">
+                <div class="mb-3">
+                    <label for="namaPelangganManual" class="form-label">Nama Pelanggan</label>
+                    <input type="text" class="form-control" id="namaPelangganManual" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="emailPelangganManual" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="emailPelangganManual" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="noHandphonePelangganManual" class="form-label">No Handphone</label>
+                    <input type="tel" class="form-control" id="noHandphonePelangganManual" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="alamatPelangganManual" class="form-label">Alamat</label>
+                    <textarea class="form-control" id="alamatPelangganManual" required></textarea>
+                </div>
+            </div>
+
+            <div id="formAuto" class="d-none">
+                <div class="mb-3">
+                    <label for="pelanggan" class="form-label">Pilih Pelanggan</label>
+                    <select class="form-select" id="pelanggan" required></select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="produk" class="form-label">Pilih Produk</label>
+                <select class="form-select" id="produk" required>
+                    <!-- Daftar produk akan diisi secara otomatis -->
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="jumlahProduk" class="form-label">Jumlah Produk</label>
+                <input type="number" class="form-control" id="jumlahProduk" required min="1">
+            </div>
+
+            <div class="mb-3">
+                <label for="hargaProduk" class="form-label">Harga Produk</label>
+                <input type="number" class="form-control" id="hargaProduk" required readonly>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Simpan Transaksi</button>
+        </form>
+
+        <h3 class="mt-5">Data Transaksi</h3>
+        <table class="table table-striped" id="tabelTransaksi">
+            <thead class="table-dark">
+                <tr>
+                    <th>Pelanggan</th>
+                    <th>Produk</th>
+                    <th>Jumlah</th>
+                    <th>Harga</th>
+                    <th>Total</th>
+                    <th>Tanggal</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data transaksi akan tampil di sini -->
+            </tbody>
+        </table>
+    </div>
+    <div class="container mt-5">
         <h1 class="text-center mb-4"><i class="fas fa-exchange-alt"></i> Fitur Transaksi</h1>
 
         <!-- Tabel Transaksi -->

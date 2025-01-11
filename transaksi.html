@@ -9,105 +9,94 @@
 </head>
 <body>
     <div class="container mt-5">
-        <div class="container mt-4">
-    <h2 class="mb-4">Halaman Transaksi</h2>
-    
-    <!-- Form Transaksi -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">Form Transaksi</div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label for="pelanggan" class="form-label">Pelanggan</label>
-                    <select id="pelanggan" class="form-select">
-                        <option value="">Pilih Pelanggan</option>
-                        <!-- Pelanggan akan diisi secara dinamis -->
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label for="produk" class="form-label">Produk</label>
-                    <select id="produk" class="form-select">
-                        <option value="">Pilih Produk</option>
-                        <!-- Produk akan diisi secara dinamis -->
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label for="jumlah" class="form-label">Jumlah</label>
-                    <input type="number" id="jumlah" class="form-control" min="1" placeholder="Jumlah">
-                </div>
-                <div class="col-md-4">
-                    <label for="diskon" class="form-label">Diskon (%)</label>
-                    <input type="number" id="diskon" class="form-control" min="0" max="100" placeholder="Diskon">
-                </div>
-                <div class="col-md-4">
-                    <label for="metodePembayaran" class="form-label">Metode Pembayaran</label>
-                    <select id="metodePembayaran" class="form-select">
-                        <option value="Tunai" selected>Tunai</option>
-                        <option value="Transfer Bank">Transfer Bank</option>
-                        <option value="Kartu Kredit">Kartu Kredit</option>
-                        <option value="E-Wallet">E-Wallet</option>
-                    </select>
-                </div>
+        <h1 class="text-center"><i class="fas fa-shopping-cart"></i> Transaksi</h1>
+
+        <!-- Form Transaksi -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <form id="formTransaksi">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="pelanggan" class="form-label">Pelanggan</label>
+                            <select id="pelanggan" class="form-select">
+                                <option value="" selected>Pilih Pelanggan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="produk" class="form-label">Produk</label>
+                            <select id="produk" class="form-select">
+                                <option value="" selected>Pilih Produk</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="jumlah" class="form-label">Jumlah</label>
+                            <input type="number" id="jumlah" class="form-control" min="1" placeholder="Masukkan Jumlah">
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-primary" id="tambahKeranjang">
+                            <i class="fas fa-cart-plus"></i> Tambah ke Keranjang
+                        </button>
+                    </div>
+                </form>
             </div>
-            <button class="btn btn-success mt-3" id="tambahKeranjang">
-                <i class="fas fa-cart-plus"></i> Tambah ke Keranjang
-            </button>
         </div>
-    </div>
-    
-    <!-- Keranjang Belanja -->
-    <div class="card mb-4">
-        <div class="card-header bg-secondary text-white">Keranjang Belanja</div>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Produk</th>
-                        <th>Harga</th>
-                        <th>Jumlah</th>
-                        <th>Total</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="keranjangTable">
-                    <tr><td colspan="5" class="text-center">Keranjang Kosong</td></tr>
-                </tbody>
-            </table>
-            <div class="text-end">
-                <h5>Subtotal: <span id="subtotal">Rp0</span></h5>
-                <h5>Pajak (10%): <span id="pajak">Rp0</span></h5>
-                <h5>Diskon: <span id="potongan">Rp0</span></h5>
-                <h4>Total Bayar: <span id="totalBayar">Rp0</span></h4>
+
+        <!-- Keranjang -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5><i class="fas fa-list"></i> Keranjang Belanja</h5>
+                <table class="table table-bordered mt-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Produk</th>
+                            <th>Harga</th>
+                            <th>Jumlah</th>
+                            <th>Total</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="keranjangTable">
+                        <tr>
+                            <td colspan="5" class="text-center">Keranjang Kosong</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-end">
+                    <h5>Total Belanja: <span id="totalBelanja">Rp0</span></h5>
+                </div>
             </div>
-            <button class="btn btn-primary mt-3" id="selesaikanTransaksi">
+        </div>
+
+        <!-- Konfirmasi Transaksi -->
+        <div class="text-end mt-4">
+            <button class="btn btn-success" id="selesaikanTransaksi">
                 <i class="fas fa-check"></i> Selesaikan Transaksi
             </button>
         </div>
-    </div>
-    
-    <!-- Riwayat Transaksi -->
-    <div class="card">
-        <div class="card-header bg-info text-white">Riwayat Transaksi</div>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Pelanggan</th>
-                        <th>Total</th>
-                        <th>Pajak & Diskon</th>
-                        <th>Metode Pembayaran</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="riwayatTransaksi">
-                    <tr><td colspan="6" class="text-center">Belum ada transaksi</td></tr>
-                </tbody>
-            </table>
+
+        <!-- Riwayat Transaksi -->
+        <div class="card mt-5">
+            <div class="card-body">
+                <h5><i class="fas fa-history"></i> Riwayat Transaksi</h5>
+                <table class="table table-striped mt-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Pelanggan</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riwayatTransaksi">
+                        <tr>
+                            <td colspan="4" class="text-center">Belum ada transaksi</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
-
 
     <script src="js/transaksi.js"></script>
 </body>

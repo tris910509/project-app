@@ -1,16 +1,22 @@
 let transaksiData = JSON.parse(localStorage.getItem("transaksiData")) || [];
 let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
+let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
 
-function muatPelangganDropdown() {
+function muatDropdowns() {
     const filterPelanggan = document.getElementById("filterPelanggan");
-    filterPelanggan.innerHTML = `<option value="" selected>Semua Pelanggan</option>`;
+    const filterProduk = document.getElementById("filterProduk");
 
+    filterPelanggan.innerHTML = `<option value="" selected>Semua Pelanggan</option>`;
     pelangganData.forEach((pelanggan) => {
         filterPelanggan.innerHTML += `<option value="${pelanggan.id}">${pelanggan.nama}</option>`;
     });
+
+    filterProduk.innerHTML = `<option value="" selected>Semua Produk/Kategori</option>`;
+    produkData.forEach((produk) => {
+        filterProduk.innerHTML += `<option value="${produk.id}">${produk.nama}</option>`;
+    });
 }
 
-// Tampilkan laporan berdasarkan filter
 function tampilkanLaporan(filter = {}) {
     const laporanTable = document.getElementById("laporanTable");
     laporanTable.innerHTML = "";
@@ -24,6 +30,7 @@ function tampilkanLaporan(filter = {}) {
         if (filter.tanggal && data.tanggal !== filter.tanggal) cocok = false;
         if (filter.pelanggan && data.pelangganId !== filter.pelanggan) cocok = false;
         if (filter.status && data.status !== filter.status) cocok = false;
+        if (filter.produk && data.produkId !== filter.produk) cocok = false;
         return cocok;
     });
 
@@ -32,10 +39,15 @@ function tampilkanLaporan(filter = {}) {
         return;
     }
 
+    let produkStat = {};
+
     dataTampil.forEach((data) => {
         totalTransaksi++;
         totalPendapatan += data.total;
         totalPelanggan.add(data.pelangganId);
+
+        if (!produkStat[data.produk]) produkStat[data.produk] = 0;
+        produkStat[data.produk] += data.total;
 
         laporanTable.innerHTML += `
             <tr>
@@ -52,45 +64,52 @@ function tampilkanLaporan(filter = {}) {
     document.getElementById("totalTransaksi").textContent = totalTransaksi;
     document.getElementById("totalPendapatan").textContent = `Rp${totalPendapatan}`;
     document.getElementById("totalPelanggan").textContent = totalPelanggan.size;
+
+    renderCharts(produkStat);
 }
 
-// Ekspor laporan ke CSV
-document.getElementById("exportCsv").addEventListener("click", function () {
-    const csvData = transaksiData.map((data) => {
-        return [
-            data.tanggal,
-            data.pelanggan,
-            data.produk,
-            data.jumlah,
-            `Rp${data.total}`,
-            data.status,
-        ].join(",");
+function renderCharts(produkStat) {
+    const barCtx = document.getElementById("barChart").getContext("2d");
+    const pieCtx = document.getElementById("pieChart").getContext("2d");
+
+    new Chart(barCtx, {
+        type: "bar",
+        data: {
+            labels: Object.keys(produkStat),
+            datasets: [
+                {
+                    label: "Pendapatan",
+                    data: Object.values(produkStat),
+                    backgroundColor: "rgba(75, 192, 192, 0.6)",
+                },
+            ],
+        },
     });
 
-    const csvFile = new Blob([["Tanggal,Pelanggan,Produk,Jumlah,Total Harga,Status\n"].concat(csvData).join("\n")], {
-        type: "text/csv",
+    new Chart(pieCtx, {
+        type: "pie",
+        data: {
+            labels: Object.keys(produkStat),
+            datasets: [
+                {
+                    label: "Pendapatan",
+                    data: Object.values(produkStat),
+                    backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+                },
+            ],
+        },
     });
+}
 
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(csvFile);
-    link.download = "laporan.csv";
-    link.click();
-});
-
-// Form filter
 document.getElementById("filterForm").addEventListener("submit", function (e) {
     e.preventDefault();
-
-    const filterTanggal = document.getElementById("filterTanggal").value;
-    const filterPelanggan = document.getElementById("filterPelanggan").value;
-    const filterStatus = document.getElementById("filterStatus").value;
-
     tampilkanLaporan({
-        tanggal: filterTanggal,
-        pelanggan: filterPelanggan,
-        status: filterStatus,
+        tanggal: document.getElementById("filterTanggal").value,
+        pelanggan: document.getElementById("filterPelanggan").value,
+        status: document.getElementById("filterStatus").value,
+        produk: document.getElementById("filterProduk").value,
     });
 });
 
-muatPelangganDropdown();
+muatDropdowns();
 tampilkanLaporan();

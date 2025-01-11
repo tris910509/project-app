@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const customerName = document.getElementById("customerName");
     const productName = document.getElementById("productName");
     const quantity = document.getElementById("quantity");
+    const totalAmount = document.getElementById("totalAmount");
     const proceedToPayment = document.getElementById("proceedToPayment");
 
     // Populate dropdown pelanggan dan produk
@@ -26,17 +27,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // Render keranjang
     const renderCart = () => {
         cartTable.innerHTML = "";
+        let total = 0;
         cart.forEach((item, index) => {
+            total += item.totalPrice;
             cartTable.innerHTML += `
                 <tr>
                     <td>${item.productName}</td>
                     <td>${item.quantity}</td>
                     <td>Rp ${item.totalPrice.toLocaleString()}</td>
                     <td>
+                        <button class="btn btn-warning btn-sm" onclick="editCartItem(${index})">Edit</button>
                         <button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">Hapus</button>
                     </td>
                 </tr>`;
         });
+        totalAmount.textContent = `Rp ${total.toLocaleString()}`;
     };
 
     // Tambahkan item ke keranjang
@@ -83,6 +88,28 @@ document.addEventListener("DOMContentLoaded", () => {
         cart.splice(index, 1);
         localStorage.setItem("cart", JSON.stringify(cart));
         renderCart();
+    };
+
+    // Edit item dalam keranjang
+    window.editCartItem = (index) => {
+        const item = cart[index];
+        const newQuantity = prompt("Masukkan jumlah baru:", item.quantity);
+        if (newQuantity !== null && parseInt(newQuantity) > 0) {
+            const productIndex = products.findIndex((p) => p.id === item.productId);
+            const difference = parseInt(newQuantity) - item.quantity;
+
+            if (products[productIndex].stock - difference < 0) {
+                alert("Stok tidak mencukupi untuk jumlah baru.");
+                return;
+            }
+
+            products[productIndex].stock -= difference;
+            item.quantity = parseInt(newQuantity);
+            item.totalPrice = item.quantity * parseInt(productName.options[productName.selectedIndex].getAttribute("data-price"));
+            localStorage.setItem("products", JSON.stringify(products));
+            localStorage.setItem("cart", JSON.stringify(cart));
+            renderCart();
+        }
     };
 
     // Lanjut ke pembayaran

@@ -3,155 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Item</title>
+    <title>Item</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container mt-4">
         <h1>Manajemen Item</h1>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">Tambah Item</button>
-            <input type="text" id="searchItem" class="form-control w-25" placeholder="Cari Item...">
-        </div>
+        <form id="itemForm" class="mb-4">
+            <div class="mb-3">
+                <label for="itemName" class="form-label">Nama Item</label>
+                <input type="text" id="itemName" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </form>
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID Item</th>
+                    <th>ID</th>
                     <th>Nama Item</th>
-                    <th>Deskripsi</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody id="itemTable">
-                <!-- Data item akan dimasukkan melalui JavaScript -->
-            </tbody>
+            <tbody id="itemTable"></tbody>
         </table>
     </div>
-
-    <!-- Modal Tambah/Edit Item -->
-    <div class="modal fade" id="addItemModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah/Edit Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="itemForm">
-                        <input type="hidden" id="itemIndex">
-                        <div class="mb-3">
-                            <label for="itemName" class="form-label">Nama Item</label>
-                            <input type="text" id="itemName" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="itemDescription" class="form-label">Deskripsi</label>
-                            <textarea id="itemDescription" class="form-control" rows="2"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Simpan data item di localStorage
-        const items = JSON.parse(localStorage.getItem('items')) || [];
-
-        const itemTable = document.getElementById('itemTable');
-        const itemForm = document.getElementById('itemForm');
-        const searchItem = document.getElementById('searchItem');
-        const itemName = document.getElementById('itemName');
-        const itemDescription = document.getElementById('itemDescription');
-        const itemIndex = document.getElementById('itemIndex');
-
-        // Generate ID unik untuk item
-        function generateUniqueId() {
-            return 'ITEM-' + Date.now();
-        }
-
-        // Render data item ke tabel
-        function renderItems(filter = '') {
-            itemTable.innerHTML = '';
-            items
-                .filter(item => item.name.toLowerCase().includes(filter.toLowerCase()))
-                .forEach((item, index) => {
-                    itemTable.innerHTML += `
-                        <tr>
-                            <td>${item.id}</td>
-                            <td>${item.name}</td>
-                            <td>${item.description || '-'}</td>
-                            <td>
-                                <button class="btn btn-warning btn-sm" onclick="editItem(${index})">Edit</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteItem(${index})">Hapus</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-        }
-
-        // Tambah item baru
-        function addItem(name, description) {
-            items.push({ id: generateUniqueId(), name, description });
-            localStorage.setItem('items', JSON.stringify(items));
-            renderItems();
-        }
-
-        // Edit item
-        function editItem(index) {
-            const item = items[index];
-            itemIndex.value = index;
-            itemName.value = item.name;
-            itemDescription.value = item.description;
-
-            const modal = new bootstrap.Modal(document.getElementById('addItemModal'));
-            modal.show();
-        }
-
-        // Update item
-        function updateItem(index, name, description) {
-            items[index] = { ...items[index], name, description };
-            localStorage.setItem('items', JSON.stringify(items));
-            renderItems();
-        }
-
-        // Hapus item
-        function deleteItem(index) {
-            if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
-                items.splice(index, 1);
-                localStorage.setItem('items', JSON.stringify(items));
-                renderItems();
-            }
-        }
-
-        // Event listener untuk form
-        itemForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = itemName.value;
-            const description = itemDescription.value;
-            const index = itemIndex.value;
-
-            if (index === '') {
-                addItem(name, description);
-            } else {
-                updateItem(index, name, description);
-                itemIndex.value = '';
-            }
-
-            itemForm.reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
-            modal.hide();
-        });
-
-        // Event listener untuk pencarian
-        searchItem.addEventListener('input', () => {
-            renderItems(searchItem.value);
-        });
-
-        // Render awal data item
-        renderItems();
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="item.js"></script>
 </body>
 </html>

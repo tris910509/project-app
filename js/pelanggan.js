@@ -83,3 +83,4 @@ function toggleDiskonType() {
 
 // Muat pelanggan saat halaman pertama kali dimuat
 muatPelanggan();
+tampilkanPelanggan();

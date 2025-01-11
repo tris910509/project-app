@@ -5,63 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Transaksi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container mt-4">
-        <h1>Laporan Transaksi</h1>
-
-        <!-- Filter -->
+    <div class="container mt-5">
+        <h1 class="text-center mb-4"><i class="fas fa-chart-line"></i> Laporan Transaksi</h1>
+        
+        <div id="alertContainer"></div>
+        
         <div class="mb-3">
-            <label for="filterDate" class="form-label">Filter Berdasarkan Tanggal</label>
-            <input type="date" id="filterDate" class="form-control">
+            <label for="filterTanggal" class="form-label">Filter Tanggal</label>
+            <input type="date" class="form-control" id="filterTanggal" onchange="filterLaporan()">
         </div>
-
-        <!-- Tabel Laporan -->
-        <table class="table table-bordered">
-            <thead>
+        
+        <h3>Statistik Transaksi</h3>
+        <canvas id="laporanChart" width="400" height="200"></canvas>
+        
+        <h3 class="mt-4">Rincian Transaksi</h3>
+        <table class="table table-striped">
+            <thead class="table-dark">
                 <tr>
-                    <th>ID Transaksi</th>
                     <th>Pelanggan</th>
                     <th>Produk</th>
-                    <th>Total Harga</th>
+                    <th>Jumlah</th>
+                    <th>Total</th>
                     <th>Status Pembayaran</th>
                     <th>Tanggal</th>
                 </tr>
             </thead>
-            <tbody id="reportTable"></tbody>
+            <tbody id="laporanTable">
+                <!-- Data laporan transaksi akan ditampilkan di sini -->
+            </tbody>
         </table>
     </div>
 
-    <script>
-        const transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-        const reportTable = document.getElementById("reportTable");
-        const filterDate = document.getElementById("filterDate");
-
-        const renderReport = (filter = "") => {
-            reportTable.innerHTML = "";
-
-            const filteredTransactions = transactions.filter((transaction) =>
-                transaction.date.includes(filter)
-            );
-
-            filteredTransactions.forEach((transaction) => {
-                reportTable.innerHTML += `
-                    <tr>
-                        <td>${transaction.id}</td>
-                        <td>${transaction.customer}</td>
-                        <td>${transaction.productName}</td>
-                        <td>Rp ${transaction.finalPrice.toLocaleString()}</td>
-                        <td>${transaction.paymentStatus}</td>
-                        <td>${transaction.date}</td>
-                    </tr>`;
-            });
-        };
-
-        filterDate.addEventListener("change", (e) => {
-            renderReport(e.target.value);
-        });
-
-        renderReport();
-    </script>
+    <script src="js/laporan.js"></script>
 </body>
 </html>

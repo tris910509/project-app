@@ -16,39 +16,32 @@
             <div class="card-body">
                 <form id="formTransaksi">
                     <div class="row g-3">
-                        <!-- Pilih Peran -->
+                        <!-- Dropdown Peran -->
                         <div class="col-md-3">
-                            <label for="peran" class="form-label">Pilih Peran</label>
+                            <label for="peran" class="form-label">Peran Pelanggan</label>
                             <select id="peran" class="form-select">
-                                <option value="" selected>Pilih Peran</option>
-                                <option value="Umum">Umum</option>
-                                <option value="CosMem">Customer Member</option>
-                                <option value="PelMem">Pelanggan Member</option>
+                                <option value="Umum" selected>Umum</option>
+                                <option value="CosMem">CosMem</option>
+                                <option value="PelMem">PelMem</option>
                             </select>
                         </div>
-                        <!-- Input Manual (Umum) -->
-                        <div class="col-md-3 d-none" id="inputManual">
-                            <label for="namaPelanggan" class="form-label">Nama Pelanggan</label>
-                            <input type="text" id="namaPelanggan" class="form-control" placeholder="Masukkan Nama">
+
+                        <!-- Input Pelanggan -->
+                        <div class="col-md-6">
+                            <label for="pelangganInput" class="form-label">Pelanggan</label>
+                            <input type="text" id="pelangganInput" class="form-control" placeholder="Masukkan ID/Nama Pelanggan">
                         </div>
-                        <div class="col-md-3 d-none" id="inputHandphone">
-                            <label for="noHandphone" class="form-label">No. Handphone</label>
-                            <input type="text" id="noHandphone" class="form-control" placeholder="Masukkan No. HP">
-                        </div>
-                        <div class="col-md-3 d-none" id="inputAlamat">
-                            <label for="alamatPelanggan" class="form-label">Alamat</label>
-                            <input type="text" id="alamatPelanggan" class="form-control" placeholder="Masukkan Alamat">
-                        </div>
-                        <!-- Dropdown Pelanggan -->
-                        <div class="col-md-3 d-none" id="dropdownPelanggan">
-                            <label for="pelanggan" class="form-label">Pilih Pelanggan</label>
-                            <select id="pelanggan" class="form-select">
-                                <option value="" selected>Pilih Pelanggan</option>
-                            </select>
+
+                        <!-- Tombol Filter -->
+                        <div class="col-md-3">
+                            <label class="form-label d-block">&nbsp;</label>
+                            <button type="button" id="filterPelanggan" class="btn btn-info w-100">
+                                <i class="fas fa-search"></i> Cari Pelanggan
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Pilih Produk -->
+                    
+                    <!-- Form Produk dan Jumlah -->
                     <div class="row g-3 mt-3">
                         <div class="col-md-4">
                             <label for="produk" class="form-label">Produk</label>
@@ -60,17 +53,18 @@
                             <label for="jumlah" class="form-label">Jumlah</label>
                             <input type="number" id="jumlah" class="form-control" min="1" placeholder="Masukkan Jumlah">
                         </div>
-                    </div>
-                    <div class="text-end mt-3">
-                        <button type="button" class="btn btn-primary" id="tambahKeranjang">
-                            <i class="fas fa-cart-plus"></i> Tambah ke Keranjang
-                        </button>
+                        <div class="col-md-4">
+                            <label class="form-label d-block">&nbsp;</label>
+                            <button type="button" id="tambahKeranjang" class="btn btn-primary w-100">
+                                <i class="fas fa-cart-plus"></i> Tambah ke Keranjang
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Keranjang Belanja -->
+        <!-- Keranjang -->
         <div class="card mt-4">
             <div class="card-body">
                 <h5><i class="fas fa-list"></i> Keranjang Belanja</h5>
@@ -101,6 +95,28 @@
             <button class="btn btn-success" id="selesaikanTransaksi">
                 <i class="fas fa-check"></i> Selesaikan Transaksi
             </button>
+        </div>
+
+        <!-- Riwayat Transaksi -->
+        <div class="card mt-5">
+            <div class="card-body">
+                <h5><i class="fas fa-history"></i> Riwayat Transaksi</h5>
+                <table class="table table-striped mt-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Pelanggan</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riwayatTransaksi">
+                        <tr>
+                            <td colspan="4" class="text-center">Belum ada transaksi</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

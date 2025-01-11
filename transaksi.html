@@ -3,249 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Transaksi dengan Peran</title>
+    <title>Transaksi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>Manajemen Transaksi dengan Peran</h1>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTransactionModal">Tambah Transaksi</button>
-            <input type="text" id="searchTransaction" class="form-control w-25" placeholder="Cari Transaksi...">
-        </div>
+    <div class="container mt-4">
+        <h1>Manajemen Transaksi</h1>
+        <form id="transactionForm" class="mb-4">
+            <div class="mb-3">
+                <label for="transactionProduct" class="form-label">Produk</label>
+                <select id="transactionProduct" class="form-control" required></select>
+            </div>
+            <div class="mb-3">
+                <label for="transactionQuantity" class="form-label">Jumlah</label>
+                <input type="number" id="transactionQuantity" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </form>
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID Transaksi</th>
+                    <th>ID</th>
                     <th>Produk</th>
-                    <th>Nama Pelanggan</th>
-                    <th>Peran</th>
                     <th>Jumlah</th>
-                    <th>Total Harga</th>
-                    <th>Diskon</th>
-                    <th>Total Akhir</th>
-                    <th>Tanggal</th>
+                    <th>Subtotal</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody id="transactionTable">
-                <!-- Data transaksi akan dimasukkan melalui JavaScript -->
-            </tbody>
+            <tbody id="transactionTable"></tbody>
         </table>
     </div>
-
-    <!-- Modal Tambah/Edit Transaksi -->
-    <div class="modal fade" id="addTransactionModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah/Edit Transaksi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="transactionForm">
-                        <input type="hidden" id="transactionIndex">
-                        <div class="mb-3">
-                            <label for="transactionRole" class="form-label">Peran</label>
-                            <select id="transactionRole" class="form-select" required>
-                                <option value="Umum">Umum</option>
-                                <option value="CosMem">CosMem</option>
-                                <option value="PelMem">PelMem</option>
-                            </select>
-                        </div>
-                        <div id="additionalFields" class="mb-3">
-                            <div class="mb-3">
-                                <label for="transactionName" class="form-label">Nama</label>
-                                <input type="text" id="transactionName" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label for="transactionPhone" class="form-label">No Handphone</label>
-                                <input type="text" id="transactionPhone" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label for="transactionEmail" class="form-label">Email</label>
-                                <input type="email" id="transactionEmail" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label for="transactionAddress" class="form-label">Alamat</label>
-                                <textarea id="transactionAddress" class="form-control"></textarea>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="transactionProduct" class="form-label">Produk</label>
-                            <select id="transactionProduct" class="form-select" required>
-                                <!-- Opsi produk akan diisi melalui JavaScript -->
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="transactionQuantity" class="form-label">Jumlah</label>
-                            <input type="number" id="transactionQuantity" class="form-control" min="1" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="transactionDiscount" class="form-label">Diskon</label>
-                            <input type="number" id="transactionDiscount" class="form-control" min="0" placeholder="Masukkan diskon (contoh: 10 untuk 10% atau 10000 untuk nominal)">
-                        </div>
-                        <div class="mb-3">
-                            <label for="transactionDiscountType" class="form-label">Jenis Diskon</label>
-                            <select id="transactionDiscountType" class="form-select">
-                                <option value="percent">Persentase (%)</option>
-                                <option value="amount">Nominal</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-        const users = JSON.parse(localStorage.getItem('users')) || []; // Data user
-        const products = JSON.parse(localStorage.getItem('products')) || []; // Data produk
-
-        const transactionTable = document.getElementById('transactionTable');
-        const transactionForm = document.getElementById('transactionForm');
-        const transactionRole = document.getElementById('transactionRole');
-        const additionalFields = document.getElementById('additionalFields');
-        const transactionProduct = document.getElementById('transactionProduct');
-        const transactionName = document.getElementById('transactionName');
-        const transactionPhone = document.getElementById('transactionPhone');
-        const transactionEmail = document.getElementById('transactionEmail');
-        const transactionAddress = document.getElementById('transactionAddress');
-        const transactionQuantity = document.getElementById('transactionQuantity');
-        const transactionDiscount = document.getElementById('transactionDiscount');
-        const transactionDiscountType = document.getElementById('transactionDiscountType');
-
-        // Generate ID unik
-        function generateUniqueId() {
-            return 'TRANS-' + Date.now();
-        }
-
-        // Render data transaksi
-        function renderTransactions(filter = '') {
-            transactionTable.innerHTML = '';
-            transactions
-                .filter(transaction => transaction.productName.toLowerCase().includes(filter.toLowerCase()))
-                .forEach((transaction, index) => {
-                    transactionTable.innerHTML += `
-                        <tr>
-                            <td>${transaction.id}</td>
-                            <td>${transaction.productName}</td>
-                            <td>${transaction.customerName}</td>
-                            <td>${transaction.role}</td>
-                            <td>${transaction.quantity}</td>
-                            <td>Rp ${transaction.totalPrice.toLocaleString()}</td>
-                            <td>${transaction.discountText}</td>
-                            <td>Rp ${transaction.finalPrice.toLocaleString()}</td>
-                            <td>${new Date(transaction.date).toLocaleString()}</td>
-                            <td>
-                                <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${index})">Hapus</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-        }
-
-        // Render opsi produk
-        function renderProductOptions() {
-            transactionProduct.innerHTML = products.map(product => `<option value="${product.id}">${product.name}</option>`).join('');
-        }
-
-        // Event listener untuk peran
-        transactionRole.addEventListener('change', () => {
-            if (transactionRole.value === 'Umum') {
-                additionalFields.style.display = 'block';
-                transactionName.required = false;
-            } else {
-                additionalFields.style.display = 'none';
-                transactionName.required = true;
-            }
-        });
-
-        // Tambah transaksi
-        function addTransaction(role, productId, quantity, discount, discountType, customerData) {
-            const product = products.find(p => p.id === productId);
-            const totalPrice = product.price * quantity;
-            let discountValue = 0;
-            let discountText = '';
-
-            if (discountType === 'percent') {
-                discountValue = (totalPrice * discount) / 100;
-                discountText = `${discount}%`;
-            } else if (discountType === 'amount') {
-                discountValue = discount;
-                discountText = `Rp ${discount.toLocaleString()}`;
-            }
-
-            const finalPrice = totalPrice - discountValue;
-
-            transactions.push({
-                id: generateUniqueId(),
-                role,
-                productName: product.name,
-                quantity,
-                totalPrice,
-                discountText,
-                finalPrice,
-                customerName: customerData.name || '-',
-                customerPhone: customerData.phone || '-',
-                customerEmail: customerData.email || '-',
-                customerAddress: customerData.address || '-',
-                date: new Date().toISOString()
-            });
-
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            renderTransactions();
-        }
-
-        // Hapus transaksi
-        function deleteTransaction(index) {
-            transactions.splice(index, 1);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            renderTransactions();
-        }
-
-        // Form submission
-        transactionForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const role = transactionRole.value;
-            const productId = transactionProduct.value;
-            const quantity = parseInt(transactionQuantity.value);
-            const discount = parseFloat(transactionDiscount.value || 0);
-            const discountType = transactionDiscountType.value;
-
-            let customerData = {};
-            if (role === 'Umum') {
-                customerData = {
-                    name: transactionName.value,
-                    phone: transactionPhone.value,
-                    email: transactionEmail.value,
-                    address: transactionAddress.value
-                };
-            } else {
-                const user = users.find(u => u.role === role);
-                customerData = {
-                    name: user.name,
-                    phone: user.phone,
-                    email: user.email,
-                    address: user.address
-                };
-            }
-
-            addTransaction(role, productId, quantity, discount, discountType, customerData);
-
-            transactionForm.reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addTransactionModal'));
-            modal.hide();
-        });
-
-        // Initial render
-        renderProductOptions();
-        renderTransactions();
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="transaksi.js"></script>
 </body>
 </html>

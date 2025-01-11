@@ -7,21 +7,33 @@ document.addEventListener("DOMContentLoaded", () => {
     const customerName = document.getElementById("customerName");
     const productName = document.getElementById("productName");
     const productQuantity = document.getElementById("productQuantity");
+    const discountField = document.getElementById("discount");
+    const totalRevenue = document.getElementById("totalRevenue");
+    const totalProducts = document.getElementById("totalProducts");
+    const totalTransactions = document.getElementById("totalTransactions");
 
-    // Render dropdown pelanggan
-    const populateCustomerDropdown = () => {
+    // Populate dropdown pelanggan dan produk
+    const populateDropdowns = () => {
         customerName.innerHTML = "";
+        productName.innerHTML = "";
+
         customers.forEach((customer) => {
             customerName.innerHTML += `<option value="${customer.name}">${customer.name}</option>`;
         });
+
+        products.forEach((product) => {
+            productName.innerHTML += `<option value="${product.id}" data-stock="${product.stock}" data-price="${product.price}">${product.name}</option>`;
+        });
     };
 
-    // Render dropdown produk
-    const populateProductDropdown = () => {
-        productName.innerHTML = "";
-        products.forEach((product) => {
-            productName.innerHTML += `<option value="${product.id}">${product.name}</option>`;
-        });
+    // Hitung total laporan
+    const updateReport = () => {
+        const totalRevenueAmount = transactions.reduce((acc, transaction) => acc + transaction.finalPrice, 0);
+        const totalProductsSold = transactions.reduce((acc, transaction) => acc + transaction.quantity, 0);
+
+        totalRevenue.innerText = `Rp ${totalRevenueAmount.toLocaleString()}`;
+        totalProducts.innerText = totalProductsSold;
+        totalTransactions.innerText = transactions.length;
     };
 
     // Render transaksi ke tabel
@@ -33,14 +45,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${transaction.id}</td>
                     <td>${transaction.customer}</td>
                     <td>${transaction.productName}</td>
-                    <td>${transaction.category}</td>
                     <td>${transaction.quantity}</td>
                     <td>Rp ${transaction.totalPrice.toLocaleString()}</td>
+                    <td>${transaction.discount}%</td>
+                    <td>Rp ${transaction.finalPrice.toLocaleString()}</td>
                     <td>
                         <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${index})">Hapus</button>
                     </td>
                 </tr>`;
         });
+
+        updateReport();
     };
 
     // Proses transaksi
@@ -57,30 +72,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const product = products.find((p) => p.id === productId);
 
-        if (!product) {
-            alert("Produk tidak ditemukan!");
-            return;
-        }
-
         if (quantity > product.stock) {
             alert(`Stok tidak mencukupi! Stok saat ini: ${product.stock}`);
             return;
         }
 
-        // Kurangi stok produk
+        const discount = quantity >= 10 ? 10 : 0; // Diskon 10% jika pembelian >= 10 item
+        const totalPrice = product.price * quantity;
+        const finalPrice = totalPrice - (totalPrice * discount) / 100;
+
+        // Kurangi stok
         product.stock -= quantity;
         localStorage.setItem("products", JSON.stringify(products));
 
         // Tambahkan transaksi
         const id = `TRX-${Date.now()}`;
-        const totalPrice = product.price * quantity;
         const newTransaction = {
             id,
             customer,
             productName: product.name,
-            category: product.category,
             quantity,
             totalPrice,
+            discount,
+            finalPrice,
         };
 
         transactions.push(newTransaction);
@@ -96,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const product = products.find((p) => p.name === transaction.productName);
 
             if (product) {
-                product.stock += transaction.quantity; // Kembalikan stok
+                product.stock += transaction.quantity;
                 localStorage.setItem("products", JSON.stringify(products));
             }
 
@@ -106,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    populateCustomerDropdown();
-    populateProductDropdown();
+    populateDropdowns();
     renderTransactions();
 });

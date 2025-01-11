@@ -3,50 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Transaksi</title>
+    <title>Transaksi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center mb-4"><i class="fas fa-shopping-cart"></i> Kelola Transaksi</h1>
-        <div id="alertContainer"></div>
-        <form id="transaksiForm" class="mb-4">
-            <div class="mb-3">
-                <label for="pelanggan" class="form-label">Pelanggan</label>
-                <select class="form-select" id="pelanggan" required>
-                    <option value="" disabled selected>Pilih pelanggan</option>
-                </select>
+        <h1 class="text-center"><i class="fas fa-shopping-cart"></i> Transaksi</h1>
+
+        <!-- Form Transaksi -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <form id="formTransaksi">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="pelanggan" class="form-label">Pelanggan</label>
+                            <select id="pelanggan" class="form-select">
+                                <option value="" selected>Pilih Pelanggan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="produk" class="form-label">Produk</label>
+                            <select id="produk" class="form-select">
+                                <option value="" selected>Pilih Produk</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="jumlah" class="form-label">Jumlah</label>
+                            <input type="number" id="jumlah" class="form-control" min="1" placeholder="Masukkan Jumlah">
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-primary" id="tambahKeranjang">
+                            <i class="fas fa-cart-plus"></i> Tambah ke Keranjang
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="mb-3">
-                <label for="produk" class="form-label">Produk</label>
-                <select class="form-select" id="produk" required>
-                    <option value="" disabled selected>Pilih produk</option>
-                </select>
+        </div>
+
+        <!-- Keranjang -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5><i class="fas fa-list"></i> Keranjang Belanja</h5>
+                <table class="table table-bordered mt-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Produk</th>
+                            <th>Harga</th>
+                            <th>Jumlah</th>
+                            <th>Total</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="keranjangTable">
+                        <tr>
+                            <td colspan="5" class="text-center">Keranjang Kosong</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-end">
+                    <h5>Total Belanja: <span id="totalBelanja">Rp0</span></h5>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="jumlah" class="form-label">Jumlah</label>
-                <input type="number" class="form-control" id="jumlah" min="1" required>
+        </div>
+
+        <!-- Konfirmasi Transaksi -->
+        <div class="text-end mt-4">
+            <button class="btn btn-success" id="selesaikanTransaksi">
+                <i class="fas fa-check"></i> Selesaikan Transaksi
+            </button>
+        </div>
+
+        <!-- Riwayat Transaksi -->
+        <div class="card mt-5">
+            <div class="card-body">
+                <h5><i class="fas fa-history"></i> Riwayat Transaksi</h5>
+                <table class="table table-striped mt-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Pelanggan</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riwayatTransaksi">
+                        <tr>
+                            <td colspan="4" class="text-center">Belum ada transaksi</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> Tambah ke Keranjang</button>
-        </form>
-        <table class="table table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nama Produk</th>
-                    <th>Harga</th>
-                    <th>Jumlah</th>
-                    <th>Subtotal</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="keranjangTable">
-                <!-- Data keranjang ditampilkan di sini -->
-            </tbody>
-        </table>
-        <div class="text-end">
-            <h4>Total: <span id="totalHarga">0</span></h4>
-            <button id="prosesPembayaran" class="btn btn-primary mt-2"><i class="fas fa-credit-card"></i> Proses Pembayaran</button>
         </div>
     </div>
 

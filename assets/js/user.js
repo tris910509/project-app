@@ -22,14 +22,15 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const name = document.getElementById("userName").value;
         const role = document.getElementById("userRole").value;
+        const password = document.getElementById("userPassword").value;
 
-        if (!name || !role) {
+        if (!name || !role || !password) {
             alert("Semua bidang harus diisi!");
             return;
         }
 
-        const id = `USER-${Date.now()}`;
-        const newUser = { id, name, role };
+        const id = `USR-${Date.now()}`;
+        const newUser = { id, name, role, password };
         users.push(newUser);
         localStorage.setItem("users", JSON.stringify(users));
         renderUsers();

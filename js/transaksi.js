@@ -1,12 +1,8 @@
 let keranjang = [];
 let transaksiData = [];
 const produkData = [
-    { id: "P001", nama: "Produk 1", harga: 50000, stok: 20 },
-    { id: "P002", nama: "Produk 2", harga: 75000, stok: 15 },
 ];
 const pelangganData = [
-    { id: "C001", nama: "Pelanggan A" },
-    { id: "C002", nama: "Pelanggan B" },
 ];
 
 // Populate data ke dropdown

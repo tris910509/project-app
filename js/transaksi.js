@@ -1,7 +1,7 @@
 let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
 let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
 let transaksiData = JSON.parse(localStorage.getItem("transaksiData")) || [];
-let pembayaranData = JSON.parse(localStorage.getItem("pembayaranData")) || [];
+
 
 //=======================================================
 

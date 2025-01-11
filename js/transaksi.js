@@ -1,6 +1,7 @@
 let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
 let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
 let transaksiData = JSON.parse(localStorage.getItem("transaksiData")) || [];
+let pembayaranData = JSON.parse(localStorage.getItem("pembayaranData")) || [];
 
 // Muat data pelanggan
 function muatPelanggan() {
@@ -125,24 +126,10 @@ function hapusTransaksi(index) {
     tampilkanTransaksi();
 }
 
-// Muat data saat halaman pertama kali dimuat
-muatPelanggan();
-muatProduk();
-tampilkanTransaksi();
-
-
-
-
-
-
-
-
-
-
 //===============================================================
 
 let transaksiData = JSON.parse(localStorage.getItem("transaksiData")) || [];
-let pembayaranData = JSON.parse(localStorage.getItem("pembayaranData")) || [];
+
 
 // Fungsi untuk menampilkan data transaksi di tabel
 function tampilkanTransaksi() {
@@ -212,4 +199,8 @@ function prosesPembayaran() {
     alert("Pembayaran berhasil diproses.");
 }
 
+
+// Muat data saat halaman pertama kali dimuat
+muatPelanggan();
+muatProduk();
 tampilkanTransaksi();

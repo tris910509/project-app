@@ -3,175 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan</title>
+    <title>Laporan Transaksi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>Laporan</h1>
-        <ul class="nav nav-tabs mb-3" id="reportTabs">
-            <li class="nav-item">
-                <button class="nav-link active" id="transactionsTab" data-bs-toggle="tab" data-bs-target="#transactionsReport">Laporan Transaksi</button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" id="paymentsTab" data-bs-toggle="tab" data-bs-target="#paymentsReport">Laporan Pembayaran</button>
-            </li>
-        </ul>
-
-        <div class="tab-content">
-            <!-- Tab Laporan Transaksi -->
-            <div class="tab-pane fade show active" id="transactionsReport">
-                <h2>Laporan Transaksi</h2>
-                <div class="mb-3">
-                    <label for="filterTransactionsDate" class="form-label">Filter Tanggal</label>
-                    <input type="date" id="filterTransactionsDate" class="form-control">
-                </div>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>ID Transaksi</th>
-                            <th>Nama Pelanggan</th>
-                            <th>Tanggal</th>
-                            <th>Daftar Item</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionsTable">
-                        <!-- Data akan dimasukkan melalui JavaScript -->
-                    </tbody>
-                </table>
-                <button class="btn btn-success" onclick="exportToCSV('transactions')">Ekspor ke CSV</button>
-            </div>
-
-            <!-- Tab Laporan Pembayaran -->
-            <div class="tab-pane fade" id="paymentsReport">
-                <h2>Laporan Pembayaran</h2>
-                <div class="mb-3">
-                    <label for="filterPaymentsDate" class="form-label">Filter Tanggal</label>
-                    <input type="date" id="filterPaymentsDate" class="form-control">
-                </div>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>ID Transaksi</th>
-                            <th>Nama Pelanggan</th>
-                            <th>Total</th>
-                            <th>Dibayarkan</th>
-                            <th>Sisa</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="paymentsTable">
-                        <!-- Data akan dimasukkan melalui JavaScript -->
-                    </tbody>
-                </table>
-                <button class="btn btn-success" onclick="exportToCSV('payments')">Ekspor ke CSV</button>
-            </div>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Dashboard</a>
         </div>
+    </nav>
+
+    <!-- Laporan Transaksi -->
+    <div class="container mt-5">
+        <h1>Laporan Transaksi</h1>
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Pelanggan</th>
+                    <th>Produk</th>
+                    <th>Jumlah</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="reportTable"></tbody>
+        </table>
+        <button id="exportPdf" class="btn btn-danger">Export PDF</button>
     </div>
 
-    <script>
-        // Ambil data dari localStorage
-        const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-        const payments = JSON.parse(localStorage.getItem('payments')) || [];
-
-        const transactionsTable = document.getElementById('transactionsTable');
-        const paymentsTable = document.getElementById('paymentsTable');
-        const filterTransactionsDate = document.getElementById('filterTransactionsDate');
-        const filterPaymentsDate = document.getElementById('filterPaymentsDate');
-
-        // Render laporan transaksi
-        function renderTransactions(dateFilter = null) {
-            transactionsTable.innerHTML = '';
-            transactions
-                .filter(transaction => 
-                    !dateFilter || transaction.date === dateFilter
-                )
-                .forEach(transaction => {
-                    const items = transaction.items.map(item => `${item.name} (${item.quantity} x ${item.price})`).join(', ');
-                    transactionsTable.innerHTML += `
-                        <tr>
-                            <td>${transaction.id}</td>
-                            <td>${transaction.customer}</td>
-                            <td>${transaction.date}</td>
-                            <td>${items}</td>
-                            <td>${transaction.total}</td>
-                        </tr>
-                    `;
-                });
-        }
-
-        // Render laporan pembayaran
-        function renderPayments(dateFilter = null) {
-            paymentsTable.innerHTML = '';
-            payments
-                .filter(payment => 
-                    !dateFilter || payment.date === dateFilter
-                )
-                .forEach(payment => {
-                    const balance = payment.total - payment.paid;
-                    const status = balance === 0 ? 'Lunas' : 'Belum Lunas';
-                    paymentsTable.innerHTML += `
-                        <tr>
-                            <td>${payment.transactionID}</td>
-                            <td>${payment.customer}</td>
-                            <td>${payment.total}</td>
-                            <td>${payment.paid}</td>
-                            <td>${balance}</td>
-                            <td>${status}</td>
-                        </tr>
-                    `;
-                });
-        }
-
-        // Ekspor data ke CSV
-        function exportToCSV(type) {
-            let data = [];
-            let headers = [];
-            if (type === 'transactions') {
-                headers = ['ID Transaksi', 'Nama Pelanggan', 'Tanggal', 'Daftar Item', 'Total'];
-                data = transactions.map(transaction => {
-                    const items = transaction.items.map(item => `${item.name} (${item.quantity} x ${item.price})`).join(', ');
-                    return [transaction.id, transaction.customer, transaction.date, items, transaction.total];
-                });
-            } else if (type === 'payments') {
-                headers = ['ID Transaksi', 'Nama Pelanggan', 'Total', 'Dibayarkan', 'Sisa', 'Status'];
-                data = payments.map(payment => {
-                    const balance = payment.total - payment.paid;
-                    const status = balance === 0 ? 'Lunas' : 'Belum Lunas';
-                    return [payment.transactionID, payment.customer, payment.total, payment.paid, balance, status];
-                });
-            }
-
-            const csvContent = [
-                headers.join(','), 
-                ...data.map(row => row.join(','))
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${type}_report.csv`;
-            a.click();
-        }
-
-        // Event listener untuk filter laporan transaksi
-        filterTransactionsDate.addEventListener('change', () => {
-            renderTransactions(filterTransactionsDate.value);
-        });
-
-        // Event listener untuk filter laporan pembayaran
-        filterPaymentsDate.addEventListener('change', () => {
-            renderPayments(filterPaymentsDate.value);
-        });
-
-        // Render awal
-        renderTransactions();
-        renderPayments();
-    </script>
-
-    <script src="assets/js/laporan.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/laporan.js"></script>
 </body>
 </html>

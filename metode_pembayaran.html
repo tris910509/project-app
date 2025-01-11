@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metode Pembayaran</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4"><i class="fas fa-credit-card"></i> Metode Pembayaran</h1>
+        <div id="alertContainer"></div>
+
+        <!-- Form untuk memilih metode pembayaran -->
+        <form id="formPembayaran" onsubmit="return simpanPembayaran(event)">
+            <div class="mb-3">
+                <label for="tipePembayaran" class="form-label">Pilih Tipe Pembayaran</label>
+                <select class="form-select" id="tipePembayaran" onchange="tampilkanForm()" required>
+                    <option value="">-- Pilih Tipe Pembayaran --</option>
+                    <option value="tunai">Tunai</option>
+                    <option value="non-cash">Non-Cash</option>
+                </select>
+            </div>
+
+            <!-- Form untuk pembayaran tunai -->
+            <div id="formTunai" class="d-none">
+                <div class="mb-3">
+                    <label for="jumlahDibayar" class="form-label">Jumlah Dibayar</label>
+                    <input type="number" class="form-control" id="jumlahDibayar" min="1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="totalTagihan" class="form-label">Total Tagihan</label>
+                    <input type="number" class="form-control" id="totalTagihan" min="1" required>
+                </div>
+            </div>
+
+            <!-- Form untuk pembayaran non-cash -->
+            <div id="formNonCash" class="d-none">
+                <div class="mb-3">
+                    <label for="namaPembayaran" class="form-label">Nama Pembayaran</label>
+                    <input type="text" class="form-control" id="namaPembayaran" required>
+                </div>
+                <div class="mb-3">
+                    <label for="jenisPembayaran" class="form-label">Jenis Pembayaran</label>
+                    <select class="form-select" id="jenisPembayaran" required>
+                        <option value="Transfer Bank">Transfer Bank</option>
+                        <option value="QR Code">QR Code</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="nomorRekening" class="form-label">Nomor Rekening</label>
+                    <input type="text" class="form-control" id="nomorRekening" required>
+                </div>
+                <div class="mb-3">
+                    <label for="buktiPembayaran" class="form-label">Upload Bukti Pembayaran</label>
+                    <input type="file" class="form-control" id="buktiPembayaran" accept="image/*" required>
+                </div>
+                <div class="mb-3">
+                    <label for="keteranganPembayaran" class="form-label">Keterangan (Opsional)</label>
+                    <textarea class="form-control" id="keteranganPembayaran"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Simpan Metode Pembayaran</button>
+        </form>
+
+        <!-- Tabel Data Pembayaran -->
+        <h3 class="mt-5">Daftar Pembayaran</h3>
+        <table class="table table-striped" id="tabelPembayaran">
+            <thead class="table-dark">
+                <tr>
+                    <th>Tipe Pembayaran</th>
+                    <th>Nama Pembayaran</th>
+                    <th>Jenis</th>
+                    <th>Nomor Rekening</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data akan ditampilkan di sini -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="js/metode_pembayaran.js"></script>
+</body>
+</html>

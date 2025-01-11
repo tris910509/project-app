@@ -1,88 +1,72 @@
+let transaksiData = JSON.parse(localStorage.getItem("transaksiData")) || [];
 let pembayaranData = JSON.parse(localStorage.getItem("pembayaranData")) || [];
-let transaksiData = JSON.parse(localStorage.getItem("transaksiData")) || []; // Data transaksi
 
-// Generate ID Pembayaran otomatis
-function generateIdPembayaran() {
-    return "PAY-" + Date.now();
-}
+// Fungsi untuk menampilkan data transaksi di tabel
+function tampilkanTransaksi() {
+    const tabelTransaksi = document.getElementById("tabelTransaksi").getElementsByTagName("tbody")[0];
+    tabelTransaksi.innerHTML = "";
 
-// Update total harus dibayar berdasarkan ID Transaksi
-function updateTotal() {
-    const idTransaksi = document.getElementById("idTransaksi").value;
-    const transaksi = transaksiData.find((t) => t.id === idTransaksi);
-    if (transaksi) {
-        document.getElementById("namaTransaksi").value = transaksi.namaTransaksi;
-        document.getElementById("totalBayar").value = transaksi.total;
-    }
-}
-
-// Simpan data pembayaran
-function simpanPembayaran(event) {
-    event.preventDefault();
-
-    const pembayaran = {
-        idPembayaran: generateIdPembayaran(),
-        idTransaksi: document.getElementById("idTransaksi").value,
-        namaTransaksi: document.getElementById("namaTransaksi").value,
-        total: parseFloat(document.getElementById("totalBayar").value),
-        status: document.getElementById("statusPembayaran").value,
-    };
-
-    pembayaranData.push(pembayaran);
-    localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
-    tampilkanPembayaran();
-    alert("Data pembayaran berhasil disimpan.");
-    document.getElementById("formPembayaran").reset();
-    document.getElementById("idPembayaran").value = generateIdPembayaran();
-}
-
-// Tampilkan data di tabel
-function tampilkanPembayaran() {
-    const tabelPembayaran = document.getElementById("tabelPembayaran").getElementsByTagName('tbody')[0];
-    tabelPembayaran.innerHTML = "";
-
-    pembayaranData.forEach((pembayaran, index) => {
-        const row = tabelPembayaran.insertRow();
+    transaksiData.forEach((transaksi, index) => {
+        const row = tabelTransaksi.insertRow();
         row.innerHTML = `
-            <td>${pembayaran.idTransaksi}</td>
-            <td>${pembayaran.namaTransaksi}</td>
-            <td>${pembayaran.namaProduk || "-"}</td>
-            <td>${pembayaran.total}</td>
-            <td>${pembayaran.status}</td>
+            <td>${transaksi.id}</td>
+            <td>${transaksi.namaTransaksi}</td>
+            <td>${transaksi.total}</td>
+            <td>${transaksi.status}</td>
             <td>
-                <button class="btn btn-success btn-sm" onclick="updateStatus(${index}, 'Lunas')">Lunas</button>
-                <button class="btn btn-warning btn-sm" onclick="updateStatus(${index}, 'Pending')">Pending</button>
-                <button class="btn btn-danger btn-sm" onclick="hapusPembayaran(${index})">Hapus</button>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPembayaran" onclick="bukaPembayaran('${transaksi.id}')">Pembayaran</button>
             </td>
         `;
     });
 }
 
-// Perbarui status pembayaran
-function updateStatus(index, status) {
-    pembayaranData[index].status = status;
-    localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
-    tampilkanPembayaran();
+// Buka modal pembayaran dengan data transaksi
+function bukaPembayaran(idTransaksi) {
+    const transaksi = transaksiData.find((t) => t.id === idTransaksi);
+    document.getElementById("metodePembayaran").value = "Tunai";
+    toggleNonTunaiFields();
+    tampilkanPembayaran(transaksi.id);
 }
 
-// Hapus data pembayaran
-function hapusPembayaran(index) {
-    pembayaranData.splice(index, 1);
-    localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
-    tampilkanPembayaran();
-}
+// Tampilkan data pembayaran dalam modal
+function tampilkanPembayaran(idTransaksi) {
+    const tabelPembayaran = document.getElementById("tabelPembayaran").getElementsByTagName("tbody")[0];
+    tabelPembayaran.innerHTML = "";
 
-// Isi dropdown ID Transaksi dari data transaksi
-function isiDropdownTransaksi() {
-    const dropdown = document.getElementById("idTransaksi");
-    transaksiData.forEach((transaksi) => {
-        const option = document.createElement("option");
-        option.value = transaksi.id;
-        option.textContent = transaksi.id + " - " + transaksi.namaTransaksi;
-        dropdown.appendChild(option);
+    const pembayaranTerkait = pembayaranData.filter((p) => p.idTransaksi === idTransaksi);
+
+    pembayaranTerkait.forEach((pembayaran) => {
+        const row = tabelPembayaran.insertRow();
+        row.innerHTML = `
+            <td>${pembayaran.idPembayaran}</td>
+            <td>${pembayaran.metodePembayaran}</td>
+            <td>${pembayaran.total}</td>
+            <td>${pembayaran.status}</td>
+        `;
     });
 }
 
-document.getElementById("idPembayaran").value = generateIdPembayaran();
-isiDropdownTransaksi();
-tampilkanPembayaran();
+// Toggle field untuk pembayaran non-tunai
+function toggleNonTunaiFields() {
+    const metode = document.getElementById("metodePembayaran").value;
+    document.getElementById("nonTunaiFields").style.display = metode === "Non-Tunai" ? "block" : "none";
+}
+
+// Proses pembayaran
+function prosesPembayaran() {
+    const metode = document.getElementById("metodePembayaran").value;
+    const pembayaran = {
+        idPembayaran: "PAY-" + Date.now(),
+        idTransaksi: document.getElementById("tabelTransaksi").getAttribute("data-id-transaksi"),
+        metodePembayaran: metode,
+        total: 10000, // Ambil dari data transaksi
+        status: metode === "Tunai" ? "Lunas" : "Belum Konfirmasi",
+    };
+
+    pembayaranData.push(pembayaran);
+    localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
+    tampilkanPembayaran(pembayaran.idTransaksi);
+    alert("Pembayaran berhasil diproses.");
+}
+
+tampilkanTransaksi();

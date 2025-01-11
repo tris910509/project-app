@@ -3,190 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitur User dengan Peran</title>
+    <title>User</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container mt-4">
         <h1>Manajemen User</h1>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">Tambah User</button>
-            <input type="text" id="searchUser" class="form-control w-25" placeholder="Cari User...">
-        </div>
+        <form id="userForm" class="mb-4">
+            <div class="mb-3">
+                <label for="userName" class="form-label">Nama Lengkap</label>
+                <input type="text" id="userName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="userRole" class="form-label">Peran</label>
+                <select id="userRole" class="form-control" required>
+                    <option value="admin">Admin</option>
+                    <option value="kasir">Kasir</option>
+                    <option value="operator">Operator</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="userPassword" class="form-label">Kata Sandi</label>
+                <input type="password" id="userPassword" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </form>
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>ID User</th>
                     <th>Nama</th>
                     <th>Peran</th>
-                    <th>Tanggal Lahir</th>
-                    <th>No Handphone</th>
-                    <th>Alamat</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody id="userTable">
-                <!-- Data akan dimasukkan melalui JavaScript -->
-            </tbody>
+            <tbody id="userTable"></tbody>
         </table>
     </div>
-
-    <!-- Modal Tambah/Edit User -->
-    <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah/Edit User</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="userForm">
-                        <input type="hidden" id="userIndex">
-                        <div class="mb-3">
-                            <label for="userName" class="form-label">Nama</label>
-                            <input type="text" id="userName" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="userRole" class="form-label">Peran</label>
-                            <select id="userRole" class="form-select" required>
-                                <option value="Admin">Admin</option>
-                                <option value="Operator">Operator</option>
-                                <option value="Kasir">Kasir</option>
-                                <option value="Pelanggan">Pelanggan</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="userDob" class="form-label">Tanggal Lahir</label>
-                            <input type="date" id="userDob" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="userPhone" class="form-label">No Handphone</label>
-                            <input type="tel" id="userPhone" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="userAddress" class="form-label">Alamat</label>
-                            <textarea id="userAddress" class="form-control" rows="2" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Simpan data user di localStorage
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-
-        const userTable = document.getElementById('userTable');
-        const userForm = document.getElementById('userForm');
-        const searchUser = document.getElementById('searchUser');
-        const userName = document.getElementById('userName');
-        const userRole = document.getElementById('userRole');
-        const userDob = document.getElementById('userDob');
-        const userPhone = document.getElementById('userPhone');
-        const userAddress = document.getElementById('userAddress');
-        const userIndex = document.getElementById('userIndex');
-
-        // Generate ID unik
-        function generateUniqueId() {
-            return 'USER-' + Date.now();
-        }
-
-        // Render data user ke tabel
-        function renderUsers(filter = '') {
-            userTable.innerHTML = '';
-            users
-                .filter(user => 
-                    user.name.toLowerCase().includes(filter.toLowerCase()) || 
-                    user.role.toLowerCase().includes(filter.toLowerCase())
-                )
-                .forEach((user, index) => {
-                    userTable.innerHTML += `
-                        <tr>
-                            <td>${user.id}</td>
-                            <td>${user.name}</td>
-                            <td>${user.role}</td>
-                            <td>${user.dob}</td>
-                            <td>${user.phone}</td>
-                            <td>${user.address}</td>
-                            <td>
-                                <button class="btn btn-warning btn-sm" onclick="editUser(${index})">Edit</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteUser(${index})">Hapus</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-        }
-
-        // Tambah user baru
-        function addUser(name, role, dob, phone, address) {
-            users.push({ id: generateUniqueId(), name, role, dob, phone, address });
-            localStorage.setItem('users', JSON.stringify(users));
-            renderUsers();
-        }
-
-        // Edit user
-        function editUser(index) {
-            const user = users[index];
-            userIndex.value = index;
-            userName.value = user.name;
-            userRole.value = user.role;
-            userDob.value = user.dob;
-            userPhone.value = user.phone;
-            userAddress.value = user.address;
-
-            const modal = new bootstrap.Modal(document.getElementById('addUserModal'));
-            modal.show();
-        }
-
-        // Update user
-        function updateUser(index, name, role, dob, phone, address) {
-            users[index] = { ...users[index], name, role, dob, phone, address };
-            localStorage.setItem('users', JSON.stringify(users));
-            renderUsers();
-        }
-
-        // Hapus user
-        function deleteUser(index) {
-            if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-                users.splice(index, 1);
-                localStorage.setItem('users', JSON.stringify(users));
-                renderUsers();
-            }
-        }
-
-        // Event listener untuk form
-        userForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = userName.value;
-            const role = userRole.value;
-            const dob = userDob.value;
-            const phone = userPhone.value;
-            const address = userAddress.value;
-            const index = userIndex.value;
-
-            if (index === '') {
-                addUser(name, role, dob, phone, address);
-            } else {
-                updateUser(index, name, role, dob, phone, address);
-                userIndex.value = '';
-            }
-
-            userForm.reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
-            modal.hide();
-        });
-
-        // Event listener untuk pencarian
-        searchUser.addEventListener('input', () => {
-            renderUsers(searchUser.value);
-        });
-
-        // Render awal data user
-        renderUsers();
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="user.js"></script>
 </body>
 </html>

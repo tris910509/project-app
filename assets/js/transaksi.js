@@ -6,16 +6,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const transactionTable = document.getElementById("transactionTable");
     const customerName = document.getElementById("customerName");
     const productName = document.getElementById("productName");
-    const productQuantity = document.getElementById("productQuantity");
-    const discountField = document.getElementById("discount");
-    const totalRevenue = document.getElementById("totalRevenue");
-    const totalProducts = document.getElementById("totalProducts");
-    const totalTransactions = document.getElementById("totalTransactions");
+    const quantity = document.getElementById("quantity");
+    const discount = document.getElementById("discount");
+    const searchTransaction = document.getElementById("searchTransaction");
 
     // Populate dropdown pelanggan dan produk
     const populateDropdowns = () => {
-        customerName.innerHTML = "";
-        productName.innerHTML = "";
+        customerName.innerHTML = "<option value=''>Pilih Pelanggan</option>";
+        productName.innerHTML = "<option value=''>Pilih Produk</option>";
 
         customers.forEach((customer) => {
             customerName.innerHTML += `<option value="${customer.name}">${customer.name}</option>`;
@@ -26,20 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    // Hitung total laporan
-    const updateReport = () => {
-        const totalRevenueAmount = transactions.reduce((acc, transaction) => acc + transaction.finalPrice, 0);
-        const totalProductsSold = transactions.reduce((acc, transaction) => acc + transaction.quantity, 0);
-
-        totalRevenue.innerText = `Rp ${totalRevenueAmount.toLocaleString()}`;
-        totalProducts.innerText = totalProductsSold;
-        totalTransactions.innerText = transactions.length;
-    };
-
     // Render transaksi ke tabel
-    const renderTransactions = () => {
+    const renderTransactions = (filter = "") => {
         transactionTable.innerHTML = "";
-        transactions.forEach((transaction, index) => {
+        const filteredTransactions = transactions.filter((transaction) =>
+            transaction.customer.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        filteredTransactions.forEach((transaction, index) => {
             transactionTable.innerHTML += `
                 <tr>
                     <td>${transaction.id}</td>
@@ -54,8 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                 </tr>`;
         });
-
-        updateReport();
     };
 
     // Proses transaksi
@@ -63,26 +53,23 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const customer = customerName.value;
         const productId = productName.value;
-        const quantity = parseInt(productQuantity.value, 10);
+        const productOption = productName.options[productName.selectedIndex];
+        const quantityValue = parseInt(quantity.value, 10);
+        const stock = parseInt(productOption.getAttribute("data-stock"), 10);
+        const price = parseInt(productOption.getAttribute("data-price"), 10);
 
-        if (!customer || !productId || quantity <= 0) {
-            alert("Semua bidang harus diisi dengan benar!");
+        if (!customer || !productId || quantityValue <= 0 || quantityValue > stock) {
+            alert("Data tidak valid atau stok tidak mencukupi.");
             return;
         }
 
-        const product = products.find((p) => p.id === productId);
-
-        if (quantity > product.stock) {
-            alert(`Stok tidak mencukupi! Stok saat ini: ${product.stock}`);
-            return;
-        }
-
-        const discount = quantity >= 10 ? 10 : 0; // Diskon 10% jika pembelian >= 10 item
-        const totalPrice = product.price * quantity;
-        const finalPrice = totalPrice - (totalPrice * discount) / 100;
+        const discountValue = quantityValue >= 10 ? 10 : 0; // Diskon 10% jika beli >= 10
+        const totalPrice = price * quantityValue;
+        const finalPrice = totalPrice - (totalPrice * discountValue) / 100;
 
         // Kurangi stok
-        product.stock -= quantity;
+        const productIndex = products.findIndex((p) => p.id === productId);
+        products[productIndex].stock -= quantityValue;
         localStorage.setItem("products", JSON.stringify(products));
 
         // Tambahkan transaksi
@@ -90,10 +77,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const newTransaction = {
             id,
             customer,
-            productName: product.name,
-            quantity,
+            productName: productOption.text,
+            quantity: quantityValue,
             totalPrice,
-            discount,
+            discount: discountValue,
             finalPrice,
         };
 
@@ -107,10 +94,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.deleteTransaction = (index) => {
         if (confirm("Yakin ingin menghapus transaksi ini?")) {
             const transaction = transactions[index];
-            const product = products.find((p) => p.name === transaction.productName);
+            const productIndex = products.findIndex((p) => p.name === transaction.productName);
 
-            if (product) {
-                product.stock += transaction.quantity;
+            if (productIndex >= 0) {
+                products[productIndex].stock += transaction.quantity;
                 localStorage.setItem("products", JSON.stringify(products));
             }
 
@@ -119,6 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
             renderTransactions();
         }
     };
+
+    // Filter transaksi
+    searchTransaction.addEventListener("input", (e) => {
+        renderTransactions(e.target.value);
+    });
 
     populateDropdowns();
     renderTransactions();

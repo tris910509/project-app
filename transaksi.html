@@ -9,120 +9,103 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center mb-4"><i class="fas fa-shopping-cart"></i> Formulir Transaksi</h1>
-        <div id="alertContainer"></div>
+        <h1 class="text-center mb-4"><i class="fas fa-shopping-cart"></i> Fitur Transaksi</h1>
 
-        <form id="formTransaksi" onsubmit="return simpanTransaksi(event)">
+        <!-- Form Pilih Peran -->
+        <form id="formTransaksi">
             <div class="mb-3">
-                <label for="peranPelanggan" class="form-label">Peran Pelanggan</label>
-                <select class="form-select" id="peranPelanggan" onchange="ubahFormPelanggan()" required>
+                <label for="peranTransaksi" class="form-label">Peran</label>
+                <select class="form-select" id="peranTransaksi" onchange="togglePeranFields()" required>
                     <option value="Umum">Umum</option>
-                    <option value="CosMen">CosMen</option>
+                    <option value="CosMem">CosMem</option>
                     <option value="PelMem">PelMem</option>
                 </select>
             </div>
 
-            <div id="formManual" class="d-none">
+            <!-- Input Data Peran Umum -->
+            <div id="umumFields">
                 <div class="mb-3">
-                    <label for="namaPelangganManual" class="form-label">Nama Pelanggan</label>
-                    <input type="text" class="form-control" id="namaPelangganManual" required>
+                    <label for="namaPelanggan" class="form-label">Nama</label>
+                    <input type="text" class="form-control" id="namaPelanggan" placeholder="Masukkan Nama">
                 </div>
-
                 <div class="mb-3">
-                    <label for="emailPelangganManual" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="emailPelangganManual" required>
+                    <label for="noHandphone" class="form-label">No Handphone</label>
+                    <input type="text" class="form-control" id="noHandphone" placeholder="Masukkan No Handphone">
                 </div>
-
                 <div class="mb-3">
-                    <label for="noHandphonePelangganManual" class="form-label">No Handphone</label>
-                    <input type="tel" class="form-control" id="noHandphonePelangganManual" required>
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="Masukkan Email">
                 </div>
-
                 <div class="mb-3">
-                    <label for="alamatPelangganManual" class="form-label">Alamat</label>
-                    <textarea class="form-control" id="alamatPelangganManual" required></textarea>
+                    <label for="alamat" class="form-label">Alamat</label>
+                    <textarea class="form-control" id="alamat" placeholder="Masukkan Alamat"></textarea>
                 </div>
             </div>
 
-            <div id="formAuto" class="d-none">
-                <div class="mb-3">
-                    <label for="pelanggan" class="form-label">Pilih Pelanggan</label>
-                    <select class="form-select" id="pelanggan" required></select>
-                </div>
-            </div>
-
+            <!-- Pilih Produk -->
             <div class="mb-3">
-                <label for="produk" class="form-label">Pilih Produk</label>
-                <select class="form-select" id="produk" required>
-                    <!-- Daftar produk akan diisi secara otomatis -->
+                <label for="produkTransaksi" class="form-label">Pilih Produk</label>
+                <select class="form-select" id="produkTransaksi" onchange="pilihProduk()">
+                    <option value="">Pilih Produk</option>
+                    <!-- Data produk akan diambil secara dinamis -->
                 </select>
             </div>
 
-            <div class="mb-3">
-                <label for="jumlahProduk" class="form-label">Jumlah Produk</label>
-                <input type="number" class="form-control" id="jumlahProduk" required min="1">
+            <!-- Informasi Produk -->
+            <div id="produkInfo" style="display: none;">
+                <h5>Detail Produk</h5>
+                <p><strong>Nama Produk:</strong> <span id="namaProduk"></span></p>
+                <p><strong>Item:</strong> <span id="itemProduk"></span></p>
+                <p><strong>Harga:</strong> <span id="hargaProduk"></span></p>
+                <p><strong>Stok:</strong> <span id="stokProduk"></span></p>
             </div>
 
-            <div class="mb-3">
-                <label for="hargaProduk" class="form-label">Harga Produk</label>
-                <input type="number" class="form-control" id="hargaProduk" required readonly>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Simpan Transaksi</button>
+            <!-- Keranjang -->
+            <button type="button" class="btn btn-success" onclick="simpanKeKeranjang()">Simpan ke Keranjang</button>
         </form>
 
-        <h3 class="mt-5">Data Transaksi</h3>
-        <table class="table table-striped" id="tabelTransaksi">
+        <!-- Tabel Keranjang -->
+        <h3 class="mt-4">Keranjang</h3>
+        <table class="table table-striped" id="tabelKeranjang">
             <thead class="table-dark">
                 <tr>
-                    <th>Pelanggan</th>
-                    <th>Produk</th>
-                    <th>Jumlah</th>
+                    <th>Nama Produk</th>
+                    <th>Item</th>
                     <th>Harga</th>
+                    <th>Jumlah</th>
+                    <th>diskon</th>
                     <th>Total</th>
-                    <th>Tanggal</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data transaksi akan tampil di sini -->
-            </tbody>
-        </table>
-    </div>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4"><i class="fas fa-exchange-alt"></i> Fitur Transaksi</h1>
-
-        <!-- Tabel Transaksi -->
-        <h3>Daftar Transaksi</h3>
-        <table class="table table-striped" id="tabelTransaksi">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID Transaksi</th>
-                    <th>Nama Transaksi</th>
-                    <th>Total</th>
-                    <th>Status</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Data transaksi akan ditampilkan di sini -->
+                <!-- Data keranjang akan ditampilkan di sini -->
             </tbody>
         </table>
 
+        <!-- Total -->
+        <div class="mt-3">
+            <h5>Subtotal: <span id="subtotal">0</span></h5>
+            <h5>Jumlah yang Harus Dibayar: <span id="jumlahBayar">0</span></h5>
+            <h5>Kembalian: <span id="kembalian">0</span></h5>
+        </div>
+
+        <!-- Tombol Pembayaran -->
+        <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#modalPembayaran">Pembayaran</button>
+
         <!-- Modal Pembayaran -->
         <div class="modal fade" id="modalPembayaran" tabindex="-1" aria-labelledby="modalPembayaranLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalPembayaranLabel">Pembayaran Transaksi</h5>
+                        <h5 class="modal-title" id="modalPembayaranLabel">Pembayaran</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <!-- Form Pilihan Metode Pembayaran -->
-                        <form id="formPembayaran">
+                        <form>
                             <div class="mb-3">
                                 <label for="metodePembayaran" class="form-label">Metode Pembayaran</label>
-                                <select class="form-select" id="metodePembayaran" onchange="toggleNonTunaiFields()" required>
+                                <select class="form-select" id="metodePembayaran" onchange="toggleNonTunaiFields()">
                                     <option value="Tunai">Tunai</option>
                                     <option value="Non-Tunai">Non-Tunai</option>
                                 </select>
@@ -144,28 +127,8 @@
                                     <label for="buktiPembayaran" class="form-label">Upload Bukti Pembayaran</label>
                                     <input type="file" class="form-control" id="buktiPembayaran">
                                 </div>
-                                <div class="mb-3">
-                                    <label for="keteranganPembayaran" class="form-label">Keterangan</label>
-                                    <textarea class="form-control" id="keteranganPembayaran"></textarea>
-                                </div>
                             </div>
                         </form>
-
-                        <!-- Tabel Pembayaran -->
-                        <h5 class="mt-4">Tabel Pembayaran</h5>
-                        <table class="table table-striped" id="tabelPembayaran">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>ID Pembayaran</th>
-                                    <th>Metode Pembayaran</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Data pembayaran akan ditampilkan di sini -->
-                            </tbody>
-                        </table>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>

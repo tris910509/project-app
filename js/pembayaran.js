@@ -1,170 +1,85 @@
-// Data metode pembayaran disimpan di localStorage
 let pembayaranData = JSON.parse(localStorage.getItem("pembayaranData")) || [];
 
-// Fungsi untuk menyimpan metode pembayaran
-function simpanPembayaran(event) {
-    event.preventDefault();
-
-    const namaPembayaran = document.getElementById("namaPembayaran").value;
-    const jenisPembayaran = document.getElementById("jenisPembayaran").value;
-    const nomorRekening = document.getElementById("nomorRekening").value;
-    const keteranganPembayaran = document.getElementById("keteranganPembayaran").value;
-
-    const pembayaran = {
-        nama: namaPembayaran,
-        jenis: jenisPembayaran,
-        nomorRekening: nomorRekening,
-        keterangan: keteranganPembayaran
-    };
-
-    pembayaranData.push(pembayaran);
-    localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
-
-    tampilkanAlert("Metode Pembayaran berhasil ditambahkan.", "success");
-    tampilkanPembayaran();
-    document.getElementById("formPembayaran").reset();
+// Membuat ID Pembayaran unik
+function generateIdPembayaran() {
+    return "PB" + Date.now();
 }
 
-// Fungsi untuk menampilkan alert
-function tampilkanAlert(message, type) {
-    const alertContainer = document.getElementById("alertContainer");
-    alertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
-    setTimeout(() => {
-        alertContainer.innerHTML = "";
-    }, 3000);
-}
-
-// Fungsi untuk menampilkan data metode pembayaran
+// Menampilkan data pembayaran di tabel
 function tampilkanPembayaran() {
-    const tabelPembayaran = document.getElementById("tabelPembayaran").getElementsByTagName('tbody')[0];
+    const tabelPembayaran = document.getElementById("tabelPembayaran").getElementsByTagName("tbody")[0];
     tabelPembayaran.innerHTML = "";
 
-    pembayaranData.forEach((pembayaran, index) => {
+    pembayaranData.forEach((data, index) => {
         const row = tabelPembayaran.insertRow();
         row.innerHTML = `
-            <td>${pembayaran.nama}</td>
-            <td>${pembayaran.jenis}</td>
-            <td>${pembayaran.nomorRekening || '-'}</td>
-            <td>${pembayaran.keterangan || '-'}</td>
+            <td>${data.idPembayaran}</td>
+            <td>${data.idTransaksi}</td>
+            <td>${data.namaTransaksi}</td>
+            <td>Rp ${data.totalHarusDibayar.toLocaleString()}</td>
+            <td>${data.status}</td>
             <td>
-                <button class="btn btn-warning" onclick="editPembayaran(${index})"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-danger" onclick="hapusPembayaran(${index})"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-warning btn-sm" onclick="editPembayaran(${index})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-sm" onclick="hapusPembayaran(${index})"><i class="fas fa-trash"></i></button>
             </td>
         `;
     });
 }
 
-// Fungsi untuk menghapus metode pembayaran
-function hapusPembayaran(index) {
-    pembayaranData.splice(index, 1);
-    localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
-    tampilkanPembayaran();
-}
-
-// Fungsi untuk mengedit metode pembayaran
-function editPembayaran(index) {
-    const pembayaran = pembayaranData[index];
-    document.getElementById("namaPembayaran").value = pembayaran.nama;
-    document.getElementById("jenisPembayaran").value = pembayaran.jenis;
-    document.getElementById("nomorRekening").value = pembayaran.nomorRekening;
-    document.getElementById("keteranganPembayaran").value = pembayaran.keterangan;
-
-    // Hapus pembayaran yang lama
-    pembayaranData.splice(index, 1);
-    localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
-    tampilkanPembayaran();
-}
-
-// Muat data saat halaman pertama kali dimuat
-tampilkanPembayaran();
-
-// Data metode pembayaran disimpan di localStorage
-let pembayaranData = JSON.parse(localStorage.getItem("pembayaranData")) || [];
-
-// Fungsi untuk menyimpan metode pembayaran
-function simpanPembayaran(event) {
+// Tambah data pembayaran
+function tambahPembayaran(event) {
     event.preventDefault();
 
-    const namaPembayaran = document.getElementById("namaPembayaran").value;
-    const jenisPembayaran = document.getElementById("jenisPembayaran").value;
-    const nomorRekening = document.getElementById("nomorRekening").value;
-    const keteranganPembayaran = document.getElementById("keteranganPembayaran").value;
+    const idPembayaran = document.getElementById("idPembayaran").value || generateIdPembayaran();
+    const idTransaksi = document.getElementById("idTransaksi").value;
+    const namaTransaksi = document.getElementById("namaTransaksi").value;
+    const totalHarusDibayar = parseFloat(document.getElementById("totalHarusDibayar").value);
+    const status = document.getElementById("statusPembayaran").value;
 
-    const pembayaran = {
-        nama: namaPembayaran,
-        jenis: jenisPembayaran,
-        nomorRekening: nomorRekening,
-        keterangan: keteranganPembayaran
+    // Validasi
+    if (!idTransaksi || !namaTransaksi || !totalHarusDibayar || !status) {
+        alert("Semua kolom harus diisi!");
+        return;
+    }
+
+    const pembayaranBaru = {
+        idPembayaran,
+        idTransaksi,
+        namaTransaksi,
+        totalHarusDibayar,
+        status,
     };
 
-    pembayaranData.push(pembayaran);
+    pembayaranData.push(pembayaranBaru);
     localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
-
-    tampilkanAlert("Metode Pembayaran berhasil ditambahkan.", "success");
     tampilkanPembayaran();
     document.getElementById("formPembayaran").reset();
+    alert("Data pembayaran berhasil ditambahkan.");
 }
 
-// Fungsi untuk menampilkan alert
-function tampilkanAlert(message, type) {
-    const alertContainer = document.getElementById("alertContainer");
-    alertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
-    setTimeout(() => {
-        alertContainer.innerHTML = "";
-    }, 3000);
-}
-
-// Fungsi untuk menampilkan data metode pembayaran
-function tampilkanPembayaran() {
-    const tabelPembayaran = document.getElementById("tabelPembayaran").getElementsByTagName('tbody')[0];
-    tabelPembayaran.innerHTML = "";
-
-    pembayaranData.forEach((pembayaran, index) => {
-        const row = tabelPembayaran.insertRow();
-        row.innerHTML = `
-            <td>${pembayaran.nama}</td>
-            <td>${pembayaran.jenis}</td>
-            <td>${pembayaran.nomorRekening || '-'}</td>
-            <td>${pembayaran.keterangan || '-'}</td>
-            <td>
-                <button class="btn btn-warning" onclick="editPembayaran(${index})"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-danger" onclick="hapusPembayaran(${index})"><i class="fas fa-trash"></i></button>
-            </td>
-        `;
-    });
-}
-
-// Fungsi untuk menghapus metode pembayaran
+// Hapus data pembayaran
 function hapusPembayaran(index) {
-    pembayaranData.splice(index, 1);
-    localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
-    tampilkanPembayaran();
+    if (confirm("Yakin ingin menghapus data pembayaran ini?")) {
+        pembayaranData.splice(index, 1);
+        localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
+        tampilkanPembayaran();
+    }
 }
 
-// Fungsi untuk mengedit metode pembayaran
+// Edit data pembayaran
 function editPembayaran(index) {
-    const pembayaran = pembayaranData[index];
-    document.getElementById("namaPembayaran").value = pembayaran.nama;
-    document.getElementById("jenisPembayaran").value = pembayaran.jenis;
-    document.getElementById("nomorRekening").value = pembayaran.nomorRekening;
-    document.getElementById("keteranganPembayaran").value = pembayaran.keterangan;
+    const data = pembayaranData[index];
+    document.getElementById("idPembayaran").value = data.idPembayaran;
+    document.getElementById("idTransaksi").value = data.idTransaksi;
+    document.getElementById("namaTransaksi").value = data.namaTransaksi;
+    document.getElementById("totalHarusDibayar").value = data.totalHarusDibayar;
+    document.getElementById("statusPembayaran").value = data.status;
 
-    // Hapus pembayaran yang lama
+    // Hapus data lama
     pembayaranData.splice(index, 1);
     localStorage.setItem("pembayaranData", JSON.stringify(pembayaranData));
     tampilkanPembayaran();
 }
 
-// Muat data saat halaman pertama kali dimuat
+// Inisialisasi tabel
 tampilkanPembayaran();
-

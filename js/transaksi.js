@@ -1,65 +1,46 @@
+// Simpan data sementara
 let keranjang = [];
-let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
+let transaksiData = JSON.parse(localStorage.getItem("transaksiData")) || [];
 let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
+let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
 
-function muatDropdown() {
+// Muat dropdown pelanggan dan produk
+function muatDropdowns() {
     const pelangganDropdown = document.getElementById("pelanggan");
     const produkDropdown = document.getElementById("produk");
 
-    pelangganDropdown.innerHTML = `<option value="" disabled selected>Pilih pelanggan</option>`;
-    produkDropdown.innerHTML = `<option value="" disabled selected>Pilih produk</option>`;
-
+    pelangganDropdown.innerHTML = `<option value="" selected>Pilih Pelanggan</option>`;
     pelangganData.forEach((pelanggan) => {
         pelangganDropdown.innerHTML += `<option value="${pelanggan.id}">${pelanggan.nama}</option>`;
     });
 
+    produkDropdown.innerHTML = `<option value="" selected>Pilih Produk</option>`;
     produkData.forEach((produk) => {
-        const stokInfo = produk.stok <= 5 ? " (Stok rendah)" : "";
-        produkDropdown.innerHTML += `<option value="${produk.id}">${produk.nama} - Rp${produk.harga}${stokInfo}</option>`;
+        produkDropdown.innerHTML += `<option value="${produk.id}">${produk.nama} (Stok: ${produk.stok})</option>`;
     });
 }
 
-// Filter produk berdasarkan pencarian
-document.getElementById("cariProduk").addEventListener("input", function () {
-    const keyword = this.value.toLowerCase();
-    const produkDropdown = document.getElementById("produk");
-
-    produkDropdown.innerHTML = `<option value="" disabled selected>Pilih produk</option>`;
-    produkData
-        .filter((produk) => produk.nama.toLowerCase().includes(keyword))
-        .forEach((produk) => {
-            produkDropdown.innerHTML += `<option value="${produk.id}">${produk.nama} - Rp${produk.harga}</option>`;
-        });
-});
-
-// Tambah ke keranjang dengan diskon
-document.getElementById("transaksiForm").addEventListener("submit", function (e) {
-    e.preventDefault();
-
+// Tambah ke keranjang
+document.getElementById("tambahKeranjang").addEventListener("click", function () {
     const produkId = document.getElementById("produk").value;
     const jumlah = parseInt(document.getElementById("jumlah").value);
-    const diskon = parseInt(document.getElementById("diskon").value) || 0;
 
-    const produk = produkData.find((p) => p.id === produkId);
-
-    if (!produk || produk.stok < jumlah) {
-        tampilkanAlert("Stok tidak mencukupi!", "danger");
+    if (!produkId || jumlah <= 0) {
+        alert("Pilih produk dan masukkan jumlah yang valid!");
         return;
     }
 
-    const subtotal = produk.harga * jumlah * (1 - diskon / 100);
+    const produk = produkData.find((p) => p.id === produkId);
 
-    keranjang.push({
-        id: produk.id,
-        nama: produk.nama,
-        harga: produk.harga,
-        jumlah: jumlah,
-        diskon: diskon,
-        subtotal: subtotal,
-    });
+    if (produk.stok < jumlah) {
+        alert("Stok tidak mencukupi!");
+        return;
+    }
 
+    keranjang.push({ ...produk, jumlah, total: produk.harga * jumlah });
+    produk.stok -= jumlah; // Kurangi stok
+    muatDropdowns(); // Perbarui stok di dropdown
     tampilkanKeranjang();
-    document.getElementById("transaksiForm").reset();
 });
 
 // Tampilkan keranjang
@@ -67,61 +48,93 @@ function tampilkanKeranjang() {
     const keranjangTable = document.getElementById("keranjangTable");
     keranjangTable.innerHTML = "";
 
-    let total = 0;
+    let totalBelanja = 0;
+
     keranjang.forEach((item, index) => {
-        total += item.subtotal;
+        totalBelanja += item.total;
         keranjangTable.innerHTML += `
             <tr>
                 <td>${item.nama}</td>
                 <td>Rp${item.harga}</td>
                 <td>${item.jumlah}</td>
-                <td>${item.diskon}%</td>
-                <td>Rp${item.subtotal.toFixed(2)}</td>
+                <td>Rp${item.total}</td>
                 <td>
-                    <button class="btn btn-danger btn-sm" onclick="hapusKeranjang(${index})"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusDariKeranjang(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
         `;
     });
 
-    document.getElementById("totalHarga").textContent = `Rp${total.toFixed(2)}`;
+    if (keranjang.length === 0) {
+        keranjangTable.innerHTML = `<tr><td colspan="5" class="text-center">Keranjang Kosong</td></tr>`;
+    }
+
+    document.getElementById("totalBelanja").textContent = `Rp${totalBelanja}`;
 }
 
-// Proses pembayaran
-document.getElementById("prosesPembayaran").addEventListener("click", function () {
-    if (keranjang.length === 0) {
-        tampilkanAlert("Keranjang kosong!", "danger");
+// Hapus dari keranjang
+function hapusDariKeranjang(index) {
+    const produk = keranjang[index];
+    const produkAsli = produkData.find((p) => p.id === produk.id);
+    produkAsli.stok += produk.jumlah; // Kembalikan stok
+    keranjang.splice(index, 1);
+    muatDropdowns();
+    tampilkanKeranjang();
+}
+
+// Selesaikan transaksi
+document.getElementById("selesaikanTransaksi").addEventListener("click", function () {
+    const pelangganId = document.getElementById("pelanggan").value;
+
+    if (!pelangganId || keranjang.length === 0) {
+        alert("Pilih pelanggan dan tambahkan item ke keranjang!");
         return;
     }
 
-    keranjang.forEach((item) => {
-        const produk = produkData.find((p) => p.id === item.id);
-        if (produk) {
-            produk.stok -= item.jumlah;
-        }
+    const total = keranjang.reduce((sum, item) => sum + item.total, 0);
+    const tanggal = new Date().toISOString().split("T")[0];
+
+    transaksiData.push({
+        id: `TRX-${Date.now()}`,
+        tanggal,
+        pelangganId,
+        pelanggan: pelangganData.find((p) => p.id === pelangganId).nama,
+        total,
+        status: "Lunas",
+        items: keranjang,
     });
 
-    localStorage.setItem("produkData", JSON.stringify(produkData));
-    simpanLaporan(keranjang);
-    tampilkanAlert("Pembayaran berhasil diproses!", "success");
+    localStorage.setItem("transaksiData", JSON.stringify(transaksiData));
     keranjang = [];
     tampilkanKeranjang();
+    tampilkanRiwayat();
+    alert("Transaksi berhasil diselesaikan!");
 });
 
-// Tampilkan alert
-function tampilkanAlert(message, type) {
-    const alertContainer = document.getElementById("alertContainer");
-    alertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
+// Tampilkan riwayat transaksi
+function tampilkanRiwayat() {
+    const riwayatTable = document.getElementById("riwayatTransaksi");
+    riwayatTable.innerHTML = "";
 
-    setTimeout(() => {
-        alertContainer.innerHTML = "";
-    }, 3000);
+    if (transaksiData.length === 0) {
+        riwayatTable.innerHTML = `<tr><td colspan="4" class="text-center">Belum ada transaksi</td></tr>`;
+        return;
+    }
+
+    transaksiData.forEach((trx) => {
+        riwayatTable.innerHTML += `
+            <tr>
+                <td>${trx.tanggal}</td>
+                <td>${trx.pelanggan}</td>
+                <td>Rp${trx.total}</td>
+                <td>${trx.status}</td>
+            </tr>
+        `;
+    });
 }
 
-muatDropdown();
-tampilkanKeranjang();
+// Muat awal
+muatDropdowns();
+tampilkanRiwayat();

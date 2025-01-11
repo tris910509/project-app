@@ -1,32 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
     const users = JSON.parse(localStorage.getItem("users")) || [];
     const loginForm = document.getElementById("loginForm");
-    const loginMessage = document.getElementById("loginMessage");
 
     loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
+        const username = document.getElementById("loginUsername").value;
+        const password = document.getElementById("loginPassword").value;
 
-        // Validasi pengguna
-        const user = users.find((user) => user.name === username && user.password === password);
+        const user = users.find((u) => u.name === username && u.password === password);
+
         if (user) {
-            localStorage.setItem("loggedInUser", JSON.stringify(user));
-            window.location.href = "dashboard.html"; // Arahkan ke dashboard setelah login berhasil
+            alert(`Selamat datang, ${user.name}! Anda masuk sebagai ${user.role}.`);
+            window.location.href = "dashboard.html";
         } else {
-            loginMessage.textContent = "Username atau password salah!";
+            alert("Nama pengguna atau kata sandi salah!");
         }
     });
-});
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-
-    if (!loggedInUser) {
-        alert("Anda harus login terlebih dahulu!");
-        window.location.href = "login.html";
-    } else {
-        console.log(`Selamat datang, ${loggedInUser.name}`);
-    }
 });

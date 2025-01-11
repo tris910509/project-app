@@ -3,44 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Produk</title>
+    <title>Manajemen Produk</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center mb-4"><i class="fas fa-box"></i> Kelola Produk</h1>
+        <h1 class="text-center mb-4"><i class="fas fa-cogs"></i> Manajemen Produk</h1>
         <div id="alertContainer"></div>
-        <form id="produkForm" class="mb-4">
+
+        <!-- Form untuk menambahkan produk -->
+        <form id="formProduk" onsubmit="return simpanProduk(event)">
             <div class="mb-3">
                 <label for="namaProduk" class="form-label">Nama Produk</label>
-                <input type="text" class="form-control" id="namaProduk" placeholder="Masukkan nama produk" required>
+                <input type="text" class="form-control" id="namaProduk" required>
             </div>
+
             <div class="mb-3">
-                <label for="kategoriProduk" class="form-label">Kategori</label>
+                <label for="kategoriProduk" class="form-label">Kategori Produk</label>
                 <select class="form-select" id="kategoriProduk" required>
-                    <option value="" disabled selected>Pilih kategori</option>
+                    <!-- Daftar kategori akan diisi secara otomatis -->
                 </select>
             </div>
+
             <div class="mb-3">
-                <label for="supplierProduk" class="form-label">Supplier</label>
-                <select class="form-select" id="supplierProduk" required>
-                    <option value="" disabled selected>Pilih supplier</option>
+                <label for="itemProduk" class="form-label">Item Produk</label>
+                <select class="form-select" id="itemProduk" required>
+                    <!-- Daftar item akan diisi secara otomatis -->
                 </select>
             </div>
-            <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> Tambah Produk</button>
+
+            <div class="mb-3">
+                <label for="supplierProduk" class="form-label">Supplier Produk</label>
+                <select class="form-select" id="supplierProduk" required>
+                    <!-- Daftar supplier akan diisi secara otomatis -->
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="hargaProduk" class="form-label">Harga Produk</label>
+                <input type="number" class="form-control" id="hargaProduk" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="stokProduk" class="form-label">Stok Produk</label>
+                <input type="number" class="form-control" id="stokProduk" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Tambah Produk</button>
         </form>
-        <table class="table table-striped">
+
+        <h3 class="mt-5">Daftar Produk</h3>
+        <table class="table table-striped" id="tabelProduk">
             <thead class="table-dark">
                 <tr>
-                    <th>ID</th>
                     <th>Nama Produk</th>
                     <th>Kategori</th>
+                    <th>Item</th>
                     <th>Supplier</th>
-                    <th>Aksi</th>
+                    <th>Harga</th>
+                    <th>Stok</th>
+                    <th>Action</th>
                 </tr>
             </thead>
-            <tbody id="produkTable">
+            <tbody>
                 <!-- Data produk akan ditampilkan di sini -->
             </tbody>
         </table>

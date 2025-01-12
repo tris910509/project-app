@@ -1,74 +1,76 @@
-let itemData = JSON.parse(localStorage.getItem("itemData")) || [];
+let itemData = [];
+let itemIdCounter = 1;
 
-// Tambah Item
+// ID Generator
+function generateItemId() {
+    return `ITM-${itemIdCounter++}`;
+}
+
+// Tambahkan Item
 document.getElementById("itemForm").addEventListener("submit", function (e) {
     e.preventDefault();
-
-    const namaItem = document.getElementById("namaItem").value;
-
-    const newItem = {
-        id: `ITEM${Date.now()}`,
-        nama: namaItem,
+    const item = {
+        id: generateItemId(),
+        nama: document.getElementById("namaItem").value,
+        status: document.getElementById("itemSwitch").checked ? "Aktif" : "Nonaktif",
     };
-
-    itemData.push(newItem);
-    localStorage.setItem("itemData", JSON.stringify(itemData));
-
-    tampilkanAlert("Item berhasil ditambahkan!", "success");
+    itemData.push(item);
     tampilkanItem();
-    document.getElementById("itemForm").reset();
+    alert("Item berhasil ditambahkan!");
+    this.reset();
 });
 
 // Tampilkan Item
 function tampilkanItem() {
     const itemTable = document.getElementById("itemTable");
     itemTable.innerHTML = "";
-
-    itemData.forEach((item) => {
+    itemData.forEach((item, index) => {
         itemTable.innerHTML += `
             <tr>
                 <td>${item.id}</td>
                 <td>${item.nama}</td>
+                <td>${item.status}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editItem('${item.id}')"><i class="fas fa-edit"></i> Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="hapusItem('${item.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                    <button class="btn btn-warning btn-sm" onclick="editItem(${index})"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusItem(${index})"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `;
     });
 }
 
-// Edit Item
-function editItem(id) {
-    const item = itemData.find((i) => i.id === id);
-    if (item) {
-        document.getElementById("namaItem").value = item.nama;
-        hapusItem(id);
-    }
+// Filter Item
+function filterItem() {
+    const filter = document.getElementById("filterItemStatus").value;
+    const filteredData = filter ? itemData.filter((item) => item.status === filter) : itemData;
+    document.getElementById("itemTable").innerHTML = "";
+    filteredData.forEach((item, index) => {
+        document.getElementById("itemTable").innerHTML += `
+            <tr>
+                <td>${item.id}</td>
+                <td>${item.nama}</td>
+                <td>${item.status}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editItem(${index})"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusItem(${index})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
 }
 
 // Hapus Item
-function hapusItem(id) {
-    itemData = itemData.filter((i) => i.id !== id);
-    localStorage.setItem("itemData", JSON.stringify(itemData));
-    tampilkanAlert("Item berhasil dihapus!", "danger");
-    tampilkanItem();
+function hapusItem(index) {
+    if (confirm("Yakin ingin menghapus item ini?")) {
+        itemData.splice(index, 1);
+        tampilkanItem();
+    }
 }
 
-// Tampilkan Alert
-function tampilkanAlert(message, type) {
-    const alertContainer = document.getElementById("alertContainer");
-    alertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
-
-    setTimeout(() => {
-        alertContainer.innerHTML = "";
-    }, 3000);
+// Edit Item
+function editItem(index) {
+    const item = itemData[index];
+    document.getElementById("namaItem").value = item.nama;
+    document.getElementById("itemSwitch").checked = item.status === "Aktif";
+    hapusItem(index);
 }
-
-// Muat data saat halaman pertama kali dimuat
-tampilkanItem();

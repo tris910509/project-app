@@ -1,20 +1,26 @@
 let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
 let kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [];
 let supplierData = JSON.parse(localStorage.getItem("supplierData")) || [];
+let supplierData = JSON.parse(localStorage.getItem("itemData")) || [];
 
 function muatDropdowns() {
     const kategoriDropdown = document.getElementById("kategori");
+    const supplierDropdown = document.getElementById("item");
     const supplierDropdown = document.getElementById("supplier");
 
     kategoriDropdown.innerHTML = `<option value="" disabled selected>Pilih kategori</option>`;
     supplierDropdown.innerHTML = `<option value="" disabled selected>Pilih supplier</option>`;
-
+    kategoriDropdown.innerHTML = `<option value="" disabled selected>Pilih kategori</option>`;
     kategoriData.forEach((kategori) => {
         kategoriDropdown.innerHTML += `<option value="${kategori.id}">${kategori.nama}</option>`;
     });
 
     supplierData.forEach((supplier) => {
         supplierDropdown.innerHTML += `<option value="${supplier.id}">${supplier.nama}</option>`;
+    });
+
+    itemData.forEach((item) => {
+        itemDropdown.innerHTML += `<option value="${item.id}">${item.nama}</option>`;
     });
 }
 
@@ -24,11 +30,12 @@ document.getElementById("produkForm").addEventListener("submit", function (e) {
 
     const namaProduk = document.getElementById("namaProduk").value.trim();
     const kategoriId = document.getElementById("kategori").value;
+    const kategoriId = document.getElementById("item").value;
     const harga = parseInt(document.getElementById("harga").value);
     const stok = parseInt(document.getElementById("stok").value);
     const supplierId = document.getElementById("supplier").value;
 
-    if (!namaProduk || !kategoriId || harga < 0 || stok < 0 || !supplierId) {
+    if (!namaProduk || !kategoriId || !itemId || harga < 0 || stok < 0 || !supplierId) {
         tampilkanAlert("Semua bidang harus diisi dengan benar!", "danger");
         return;
     }
@@ -37,6 +44,7 @@ document.getElementById("produkForm").addEventListener("submit", function (e) {
         id: "PROD-" + Date.now(),
         nama: namaProduk,
         kategoriId: kategoriId,
+        kategoriId: itemId,
         harga: harga,
         stok: stok,
         supplierId: supplierId,
@@ -60,14 +68,16 @@ function tampilkanProduk(filter = "") {
 
     produkTampil.forEach((produk) => {
         const kategori = kategoriData.find((k) => k.id === produk.kategoriId);
+        const item = itemData.find((s) => s.id === produk.itemId);
         const supplier = supplierData.find((s) => s.id === produk.supplierId);
-
-        const stokClass = produk.stok <= 5 ? "text-danger" : "";
+        
+        const stokClass = produk.stok <= 10 ? "text-danger" : "";
         produkTable.innerHTML += `
             <tr>
                 <td>${produk.id}</td>
                 <td>${produk.nama}</td>
                 <td>${kategori ? kategori.nama : "Tidak Ditemukan"}</td>
+                <td>${item ? item.nama : "Tidak Ditemukan"}</td>
                 <td>Rp${produk.harga}</td>
                 <td class="${stokClass}">${produk.stok}</td>
                 <td>${supplier ? supplier.nama : "Tidak Ditemukan"}</td>
@@ -87,6 +97,7 @@ function editProduk(id) {
 
     document.getElementById("namaProduk").value = produk.nama;
     document.getElementById("kategori").value = produk.kategoriId;
+    document.getElementById("item").value = produk.itemId;
     document.getElementById("harga").value = produk.harga;
     document.getElementById("stok").value = produk.stok;
     document.getElementById("supplier").value = produk.supplierId;

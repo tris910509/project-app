@@ -1,77 +1,127 @@
-let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
-let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
 let keranjang = [];
-let transaksiData = JSON.parse(localStorage.getItem("transaksiData")) || [];
+let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
+let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
 
-// Peran pelanggan
-document.getElementById("peran").addEventListener("change", function () {
-    const peran = this.value;
-    const pelangganInput = document.getElementById("pelangganInput");
-    const filterButton = document.getElementById("filterPelanggan");
+function muatDropdown() {
+    const pelangganDropdown = document.getElementById("pelanggan");
+    const produkDropdown = document.getElementById("produk");
 
-    if (peran === "Umum") {
-        pelangganInput.placeholder = "Masukkan Nama Pelanggan Baru";
-        filterButton.disabled = true;
-    } else {
-        pelangganInput.placeholder = "Masukkan ID/Nama Pelanggan";
-        filterButton.disabled = false;
-    }
-});
+    pelangganDropdown.innerHTML = `<option value="" disabled selected>Pilih pelanggan</option>`;
+    produkDropdown.innerHTML = `<option value="" disabled selected>Pilih produk</option>`;
 
-// Tambah pelanggan baru untuk peran "Umum"
-function tambahPelangganBaru(nama) {
-    const pelangganBaru = {
-        id: `PLG-${Date.now()}`,
-        nama,
-    };
-    pelangganData.push(pelangganBaru);
-    localStorage.setItem("pelangganData", JSON.stringify(pelangganData));
-    return pelangganBaru;
+    pelangganData.forEach((pelanggan) => {
+        pelangganDropdown.innerHTML += `<option value="${pelanggan.id}">${pelanggan.nama}</option>`;
+    });
+
+    produkData.forEach((produk) => {
+        const stokInfo = produk.stok <= 5 ? " (Stok rendah)" : "";
+        produkDropdown.innerHTML += `<option value="${produk.id}">${produk.nama} - Rp${produk.harga}${stokInfo}</option>`;
+    });
 }
 
-// Filter pelanggan untuk peran "CosMem" dan "PelMem"
-document.getElementById("filterPelanggan").addEventListener("click", function () {
-    const input = document.getElementById("pelangganInput").value.toLowerCase();
-    const pelanggan = pelangganData.find(
-        (p) => p.id.toLowerCase() === input || p.nama.toLowerCase().includes(input)
-    );
+// Filter produk berdasarkan pencarian
+document.getElementById("cariProduk").addEventListener("input", function () {
+    const keyword = this.value.toLowerCase();
+    const produkDropdown = document.getElementById("produk");
 
-    if (pelanggan) {
-        alert(`Pelanggan ditemukan: ${pelanggan.nama}`);
-    } else {
-        alert("Pelanggan tidak ditemukan!");
-    }
+    produkDropdown.innerHTML = `<option value="" disabled selected>Pilih produk</option>`;
+    produkData
+        .filter((produk) => produk.nama.toLowerCase().includes(keyword))
+        .forEach((produk) => {
+            produkDropdown.innerHTML += `<option value="${produk.id}">${produk.nama} - Rp${produk.harga}</option>`;
+        });
 });
 
-// Selesaikan transaksi
-document.getElementById("selesaikanTransaksi").addEventListener("click", function () {
-    const peran = document.getElementById("peran").value;
-    const pelangganInput = document.getElementById("pelangganInput").value;
-    let pelanggan;
+// Tambah ke keranjang dengan diskon
+document.getElementById("transaksiForm").addEventListener("submit", function (e) {
+    e.preventDefault();
 
-    if (peran === "Umum") {
-        pelanggan = tambahPelangganBaru(pelangganInput);
-    } else {
-        pelanggan = pelangganData.find(
-            (p) => p.id.toLowerCase() === pelangganInput.toLowerCase() || p.nama.toLowerCase().includes(pelangganInput)
-        );
-        if (!pelanggan) {
-            alert("Pelanggan tidak ditemukan!");
-            return;
-        }
+    const produkId = document.getElementById("produk").value;
+    const jumlah = parseInt(document.getElementById("jumlah").value);
+    const diskon = parseInt(document.getElementById("diskon").value) || 0;
+
+    const produk = produkData.find((p) => p.id === produkId);
+
+    if (!produk || produk.stok < jumlah) {
+        tampilkanAlert("Stok tidak mencukupi!", "danger");
+        return;
     }
 
-    // Simpan transaksi
-    const total = keranjang.reduce((sum, item) => sum + item.total, 0);
-    transaksiData.push({
-        id: `TRX-${Date.now()}`,
-        tanggal: new Date().toISOString().split("T")[0],
-        pelangganId: pelanggan.id,
-        pelanggan: pelanggan.nama,
-        total,
-        status: "Lunas",
-        items: keranjang,
+    const subtotal = produk.harga * jumlah * (1 - diskon / 100);
+
+    keranjang.push({
+        id: produk.id,
+        nama: produk.nama,
+        harga: produk.harga,
+        jumlah: jumlah,
+        diskon: diskon,
+        subtotal: subtotal,
     });
-    localStorage.setItem("transaksiData", JSON.stringify(transaksiData));
-    alert("Transaksi selesai!");
+
+    tampilkanKeranjang();
+    document.getElementById("transaksiForm").reset();
 });
+
+// Tampilkan keranjang
+function tampilkanKeranjang() {
+    const keranjangTable = document.getElementById("keranjangTable");
+    keranjangTable.innerHTML = "";
+
+    let total = 0;
+    keranjang.forEach((item, index) => {
+        total += item.subtotal;
+        keranjangTable.innerHTML += `
+            <tr>
+                <td>${item.nama}</td>
+                <td>Rp${item.harga}</td>
+                <td>${item.jumlah}</td>
+                <td>${item.diskon}%</td>
+                <td>Rp${item.subtotal.toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="hapusKeranjang(${index})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("totalHarga").textContent = `Rp${total.toFixed(2)}`;
+}
+
+// Proses pembayaran
+document.getElementById("prosesPembayaran").addEventListener("click", function () {
+    if (keranjang.length === 0) {
+        tampilkanAlert("Keranjang kosong!", "danger");
+        return;
+    }
+
+    keranjang.forEach((item) => {
+        const produk = produkData.find((p) => p.id === item.id);
+        if (produk) {
+            produk.stok -= item.jumlah;
+        }
+    });
+
+    localStorage.setItem("produkData", JSON.stringify(produkData));
+    simpanLaporan(keranjang);
+    tampilkanAlert("Pembayaran berhasil diproses!", "success");
+    keranjang = [];
+    tampilkanKeranjang();
+});
+
+// Tampilkan alert
+function tampilkanAlert(message, type) {
+    const alertContainer = document.getElementById("alertContainer");
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+
+    setTimeout(() => {
+        alertContainer.innerHTML = "";
+    }, 3000);
+}
+
+muatDropdown();
+tampilkanKeranjang();

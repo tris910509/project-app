@@ -9,51 +9,66 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center mb-4"><i class="fas fa-shopping-cart"></i> Kelola Transaksi</h1>
-        <div id="alertContainer"></div>
-        <form id="transaksiForm" class="mb-4">
-            <div class="mb-3">
-                <label for="pelanggan" class="form-label">Pelanggan</label>
-                <select class="form-select" id="pelanggan" required>
-                    <option value="" disabled selected>Pilih pelanggan</option>
-                </select>
+        <div class="container mt-4">
+    <h2>Transaksi</h2>
+    
+    <!-- Form Transaksi -->
+    <div class="card p-3 mb-4">
+        <h4>Form Transaksi</h4>
+        <form id="formTransaksi">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="produkTransaksi" class="form-label">Pilih Produk</label>
+                    <select class="form-select" id="produkTransaksi" required>
+                        <option value="">Pilih Produk</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="qtyTransaksi" class="form-label">Jumlah</label>
+                    <input type="number" id="qtyTransaksi" class="form-control" min="1" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="pelangganTransaksi" class="form-label">Pilih Pelanggan</label>
+                    <select class="form-select" id="pelangganTransaksi" required>
+                        <option value="">Pilih Pelanggan</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" id="btnTambahKeranjang" class="btn btn-primary w-100">Tambah ke Keranjang</button>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="produk" class="form-label">Produk</label>
-                <input type="text" class="form-control mb-2" id="cariProduk" placeholder="Cari produk...">
-                <select class="form-select" id="produk" required>
-                    <option value="" disabled selected>Pilih produk</option>
-                </select>
-                <small id="stokInfo" class="text-danger d-none">Stok hampir habis!</small>
-            </div>
-            <div class="mb-3">
-                <label for="jumlah" class="form-label">Jumlah</label>
-                <input type="number" class="form-control" id="jumlah" min="1" required>
-            </div>
-            <div class="mb-3">
-                <label for="diskon" class="form-label">Diskon (%)</label>
-                <input type="number" class="form-control" id="diskon" min="0" max="100" value="0">
-            </div>
-            <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i> Tambah ke Keranjang</button>
         </form>
-        <table class="table table-striped">
-            <thead class="table-dark">
+    </div>
+
+    <!-- Tabel Keranjang -->
+    <div class="card p-3 mb-4">
+        <h4>Keranjang</h4>
+        <table class="table table-bordered" id="tabelKeranjang">
+            <thead>
                 <tr>
-                    <th>Nama Produk</th>
-                    <th>Harga</th>
+                    <th>No</th>
+                    <th>Produk</th>
+                    <th>Kategori</th>
                     <th>Jumlah</th>
-                    <th>Diskon</th>
-                    <th>Subtotal</th>
+                    <th>Harga Satuan</th>
+                    <th>Total Harga</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody id="keranjangTable"></tbody>
+            <tbody></tbody>
         </table>
-        <div class="text-end">
-            <h4>Total: <span id="totalHarga">Rp0</span></h4>
-            <button id="prosesPembayaran" class="btn btn-primary mt-3"><i class="fas fa-credit-card"></i> Proses Pembayaran</button>
+    </div>
+
+    <!-- Pembayaran -->
+    <div class="card p-3">
+        <h4>Pembayaran</h4>
+        <p id="totalBayar">Total Bayar: <b>Rp 0</b></p>
+        <div class="d-flex justify-content-end">
+            <button id="btnBayar" class="btn btn-success">Bayar</button>
         </div>
     </div>
+</div>
+
     <script src="js/transaksi.js"></script>
 </body>
 </html>

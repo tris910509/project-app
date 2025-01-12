@@ -79,3 +79,5 @@ function editItem(index) {
     document.getElementById("itemSwitch").checked = item.status === "Aktif";
     hapusItem(index);
 }
+
+tampilkanItem();

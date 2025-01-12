@@ -10,83 +10,64 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center"><i class="fas fa-users"></i> Kelola Pelanggan</h1>
+
+        <!-- Alert -->
         <div id="alertContainer"></div>
+
+        <!-- Form Pelanggan -->
         <div class="card mt-4">
             <div class="card-header bg-primary text-white">
                 <h5>Form Pelanggan</h5>
             </div>
             <div class="card-body">
                 <form id="pelangganForm">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="namaPelanggan" class="form-label">Nama Pelanggan</label>
-                            <input type="text" class="form-control" id="namaPelanggan" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="peranPelanggan" class="form-label">Peran Pelanggan</label>
-                            <select id="peranPelanggan" class="form-select" required>
-                                <option value="Umum">Umum</option>
-                                <option value="cosPel">cosPel</option>
-                                <option value="cosMem">cosMem</option>
-                            </select>
+                    <input type="hidden" id="editPelangganId">
+                    <div class="mb-3">
+                        <label for="namaPelanggan" class="form-label">Nama Pelanggan</label>
+                        <input type="text" class="form-control" id="namaPelanggan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="idProduk" class="form-label">ID Produk</label>
+                        <input type="text" class="form-control" id="idProduk" placeholder="Masukkan ID Produk" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="diskonSwitch" class="form-label">Diskon</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="diskonSwitch">
+                            <label class="form-check-label" for="diskonSwitch">Aktifkan Diskon</label>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="noHandphone" class="form-label">No Handphone</label>
-                            <input type="text" class="form-control" id="noHandphone" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="alamatPelanggan" class="form-label">Alamat Pelanggan</label>
-                            <textarea class="form-control" id="alamatPelanggan" rows="2" required></textarea>
-                        </div>
+                    <div class="mb-3" id="diskonFields" style="display: none;">
+                        <label for="jenisDiskon" class="form-label">Jenis Diskon</label>
+                        <select class="form-select" id="jenisDiskon">
+                            <option value="Rupiah">Rupiah</option>
+                            <option value="Persen">Persen</option>
+                        </select>
+                        <label for="nilaiDiskon" class="form-label mt-2">Nilai Diskon</label>
+                        <input type="number" class="form-control" id="nilaiDiskon" placeholder="Masukkan Nilai Diskon">
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="statusSwitch" class="form-label">Status Pelanggan</label>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="statusSwitch">
-                                <label class="form-check-label" for="statusSwitch">Aktif</label>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label for="hargaSetelahDiskon" class="form-label">Harga Setelah Diskon</label>
+                        <input type="text" class="form-control" id="hargaSetelahDiskon" readonly>
                     </div>
-                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Simpan Pelanggan</button>
+                    <button type="submit" class="btn btn-success" id="savePelangganButton"><i class="fas fa-save"></i> Simpan Pelanggan</button>
                 </form>
             </div>
         </div>
+
+        <!-- Tabel Pelanggan -->
         <div class="card mt-4">
             <div class="card-header bg-secondary text-white">
                 <h5>Daftar Pelanggan</h5>
             </div>
             <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="filterPeran" class="form-label">Filter Peran</label>
-                        <select id="filterPeran" class="form-select" onchange="filterPelanggan()">
-                            <option value="">Semua</option>
-                            <option value="Umum">Umum</option>
-                            <option value="cosPel">cosPel</option>
-                            <option value="cosMem">cosMem</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="filterStatus" class="form-label">Filter Status</label>
-                        <select id="filterStatus" class="form-select" onchange="filterPelanggan()">
-                            <option value="">Semua</option>
-                            <option value="Aktif">Aktif</option>
-                            <option value="Nonaktif">Nonaktif</option>
-                        </select>
-                    </div>
-                </div>
                 <table class="table table-striped">
                     <thead class="table-dark">
                         <tr>
                             <th>ID Pelanggan</th>
-                            <th>Nama</th>
-                            <th>Peran</th>
-                            <th>No Handphone</th>
-                            <th>Alamat</th>
-                            <th>Status</th>
+                            <th>Nama Pelanggan</th>
+                            <th>ID Produk</th>
+                            <th>Harga Setelah Diskon</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>

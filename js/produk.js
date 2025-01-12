@@ -1,23 +1,29 @@
 let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
+let kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [];
+let itemData = JSON.parse(localStorage.getItem("itemData")) || [];
+let supplierData = JSON.parse(localStorage.getItem("supplierData")) || [];
 
-// Populasi dropdown relasi data
-function populateDropdowns() {
-    const kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [];
-    const itemData = JSON.parse(localStorage.getItem("itemData")) || [];
-    const supplierData = JSON.parse(localStorage.getItem("supplierData")) || [];
+// Inisialisasi pilihan dropdown
+function inisialisasiDropdown() {
+    const kategoriSelect = document.getElementById("kategoriProduk");
+    const itemSelect = document.getElementById("itemProduk");
+    const supplierSelect = document.getElementById("supplierProduk");
 
-    const kategoriDropdown = document.getElementById("kategoriProduk");
-    const itemDropdown = document.getElementById("itemProduk");
-    const supplierDropdown = document.getElementById("supplierProduk");
+    kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
+    itemSelect.innerHTML = '<option value="">Pilih Item</option>';
+    supplierSelect.innerHTML = '<option value="">Pilih Supplier</option>';
 
-    kategoriDropdown.innerHTML = `<option value="">Pilih Kategori</option>` + 
-        kategoriData.map(k => `<option value="${k.id}">${k.nama}</option>`).join("");
+    kategoriData.forEach(k => {
+        kategoriSelect.innerHTML += `<option value="${k.id}">${k.nama}</option>`;
+    });
 
-    itemDropdown.innerHTML = `<option value="">Pilih Item</option>` + 
-        itemData.map(i => `<option value="${i.id}">${i.nama}</option>`).join("");
+    itemData.forEach(i => {
+        itemSelect.innerHTML += `<option value="${i.id}">${i.nama}</option>`;
+    });
 
-    supplierDropdown.innerHTML = `<option value="">Pilih Supplier</option>` + 
-        supplierData.map(s => `<option value="${s.id}">${s.nama}</option>`).join("");
+    supplierData.forEach(s => {
+        supplierSelect.innerHTML += `<option value="${s.id}">${s.nama}</option>`;
+    });
 }
 
 // Simpan produk
@@ -30,27 +36,29 @@ function simpanProduk(event) {
     const supplier = document.getElementById("supplierProduk").value;
     const harga = parseFloat(document.getElementById("hargaProduk").value);
     const stok = parseInt(document.getElementById("stokProduk").value);
-    const diskonAktif = document.getElementById("diskonSwitch").checked;
-    const tipeDiskon = document.getElementById("tipeDiskon").value;
-    const nilaiDiskon = parseFloat(document.getElementById("nilaiDiskon").value) || 0;
+    const diskonAktif = document.getElementById("aktifkanDiskon").checked;
+    let diskon = 0, tipeDiskon = "", hargaDiskon = harga;
 
-    if (!nama || !kategori || !item || !supplier || isNaN(harga) || harga <= 0 || isNaN(stok) || stok < 0) {
-        alert("Harap isi semua data dengan benar!");
+    if (diskonAktif) {
+        tipeDiskon = document.getElementById("tipeDiskon").value;
+        diskon = parseFloat(document.getElementById("nilaiDiskon").value);
+        if (tipeDiskon === "rupiah") {
+            hargaDiskon = harga - diskon;
+        } else if (tipeDiskon === "persen") {
+            hargaDiskon = harga - (harga * (diskon / 100));
+        }
+    }
+
+    if (!nama || !kategori || !item || !supplier || isNaN(harga) || isNaN(stok)) {
+        alert("Mohon isi semua data dengan benar!");
         return;
     }
 
-    let hargaDiskon = harga;
-    if (diskonAktif) {
-        hargaDiskon = tipeDiskon === "rupiah" ? harga - nilaiDiskon : harga - (harga * (nilaiDiskon / 100));
-        if (hargaDiskon < 0) hargaDiskon = 0;
-    }
-
     const id = `PROD-${Date.now()}`;
-    produkData.push({ id, nama, kategori, item, supplier, harga, stok, hargaDiskon });
+    produkData.push({ id, nama, kategori, item, supplier, harga, stok, tipeDiskon, diskon, hargaDiskon });
     localStorage.setItem("produkData", JSON.stringify(produkData));
-
     document.getElementById("formProduk").reset();
-    document.getElementById("diskonFields").classList.add("d-none");
+    document.getElementById("diskonContainer").classList.add("d-none");
     updateTabelProduk();
 }
 
@@ -60,15 +68,20 @@ function updateTabelProduk() {
     tbody.innerHTML = "";
 
     produkData.forEach((produk, index) => {
+        const kategoriNama = kategoriData.find(k => k.id === produk.kategori)?.nama || "-";
+        const itemNama = itemData.find(i => i.id === produk.item)?.nama || "-";
+        const supplierNama = supplierData.find(s => s.id === produk.supplier)?.nama || "-";
+
         const row = `
             <tr>
                 <td>${index + 1}</td>
                 <td>${produk.nama}</td>
-                <td>${produk.kategori}</td>
-                <td>${produk.item}</td>
-                <td>${produk.supplier}</td>
+                <td>${kategoriNama}</td>
+                <td>${itemNama}</td>
+                <td>${supplierNama}</td>
                 <td>Rp ${produk.harga.toLocaleString()}</td>
                 <td>${produk.stok}</td>
+                <td>${produk.diskon > 0 ? `${produk.diskon} ${produk.tipeDiskon === "rupiah" ? "Rp" : "%"}` : "-"}</td>
                 <td>Rp ${produk.hargaDiskon.toLocaleString()}</td>
                 <td>
                     <button class="btn btn-warning btn-sm" onclick="editProduk('${produk.id}')">Edit</button>
@@ -89,17 +102,12 @@ function hapusProduk(id) {
     }
 }
 
-// Diskon switch toggle
-document.getElementById("diskonSwitch").addEventListener("change", function () {
-    const diskonFields = document.getElementById("diskonFields");
-    if (this.checked) {
-        diskonFields.classList.remove("d-none");
-    } else {
-        diskonFields.classList.add("d-none");
-    }
+// Diskon switch
+document.getElementById("aktifkanDiskon").addEventListener("change", function () {
+    document.getElementById("diskonContainer").classList.toggle("d-none", !this.checked);
 });
 
 // Inisialisasi
-populateDropdowns();
+inisialisasiDropdown();
 updateTabelProduk();
 document.getElementById("formProduk").addEventListener("submit", simpanProduk);

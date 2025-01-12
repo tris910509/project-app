@@ -1,9 +1,21 @@
 // Variabel penyimpanan data
 let produkIdCounter = JSON.parse(localStorage.getItem("produkIdCounter")) || 1;
 let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
-let kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [];
-let itemData = JSON.parse(localStorage.getItem("itemData")) || [];
-let supplierData = JSON.parse(localStorage.getItem("supplierData")) || [];
+let kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [
+    {"id": "CAT-1", "nama": "Elektronik"},
+    {"id": "CAT-2", "nama": "Pakaian"},
+    {"id": "CAT-3", "nama": "Peralatan Rumah Tangga"}
+];
+let itemData = JSON.parse(localStorage.getItem("itemData")) || [
+    {"id": "ITEM-1", "nama": "Laptop"},
+    {"id": "ITEM-2", "nama": "Kulkas"},
+    {"id": "ITEM-3", "nama": "Kemeja"}
+];
+let supplierData = JSON.parse(localStorage.getItem("supplierData")) || [
+    {"id": "SUP-1", "nama": "PT. Elektronik Jaya"},
+    {"id": "SUP-2", "nama": "CV. Pakaian Indah"},
+    {"id": "SUP-3", "nama": "UD. Rumah Tangga"}
+];
 
 // Fungsi untuk menghasilkan ID unik
 function generateProdukId() {

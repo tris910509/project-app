@@ -6,6 +6,11 @@ function generateItemId() {
     return `ITM-${itemIdCounter++}`;
 }
 
+// Simpan Data ke Local Storage
+function saveToLocalStorage() {
+    localStorage.setItem("itemData", JSON.stringify(itemData));
+}
+
 // Tambahkan Item
 document.getElementById("itemForm").addEventListener("submit", function (e) {
     e.preventDefault();

@@ -1,83 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitur Supplier</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center"><i class="fas fa-industry"></i> Kelola Supplier</h1>
-        <div id="alertContainer"></div>
+let supplierData = [];
+let supplierIdCounter = 1;
 
-        <!-- Form Supplier -->
-        <div class="card mt-4">
-            <div class="card-header bg-primary text-white">
-                <h5>Form Supplier</h5>
-            </div>
-            <div class="card-body">
-                <form id="supplierForm">
-                    <div class="mb-3">
-                        <label for="namaSupplier" class="form-label">Nama Supplier</label>
-                        <input type="text" class="form-control" id="namaSupplier" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="noHpSupplier" class="form-label">No Handphone</label>
-                        <input type="text" class="form-control" id="noHpSupplier" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="namaPerusahaan" class="form-label">Nama Perusahaan</label>
-                        <input type="text" class="form-control" id="namaPerusahaan" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="alamatSupplier" class="form-label">Alamat</label>
-                        <textarea class="form-control" id="alamatSupplier" rows="3" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="supplierSwitch" class="form-label">Status Supplier</label>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="supplierSwitch">
-                            <label class="form-check-label" for="supplierSwitch">Aktif</label>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Simpan Supplier</button>
-                </form>
-            </div>
-        </div>
+// ID Generator
+function generateSupplierId() {
+    return `SUP-${supplierIdCounter++}`;
+}
 
-        <!-- Tabel Supplier -->
-        <div class="card mt-4">
-            <div class="card-header bg-secondary text-white">
-                <h5>Daftar Supplier</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="filterSupplierStatus" class="form-label">Filter Status</label>
-                    <select id="filterSupplierStatus" class="form-select" onchange="filterSupplier()">
-                        <option value="">Semua</option>
-                        <option value="Aktif">Aktif</option>
-                        <option value="Nonaktif">Nonaktif</option>
-                    </select>
-                </div>
-                <table class="table table-striped">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID Supplier</th>
-                            <th>Nama Supplier</th>
-                            <th>No Handphone</th>
-                            <th>Nama Perusahaan</th>
-                            <th>Alamat</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="supplierTable"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <script src="js/supplier.js"></script>
-</body>
-</html>
+// Tambahkan Supplier
+document.getElementById("supplierForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const supplier = {
+        id: generateSupplierId(),
+        nama: document.getElementById("namaSupplier").value,
+        noHp: document.getElementById("noHpSupplier").value,
+        perusahaan: document.getElementById("namaPerusahaan").value,
+        alamat: document.getElementById("alamatSupplier").value,
+        status: document.getElementById("supplierSwitch").checked ? "Aktif" : "Nonaktif",
+    };
+    supplierData.push(supplier);
+    tampilkanSupplier();
+    alert("Supplier berhasil ditambahkan!");
+    this.reset();
+});
+
+// Tampilkan Supplier
+function tampilkanSupplier() {
+    const supplierTable = document.getElementById("supplierTable");
+    supplierTable.innerHTML = "";
+    supplierData.forEach((supplier, index) => {
+        supplierTable.innerHTML += `
+            <tr>
+                <td>${supplier.id}</td>
+                <td>${supplier.nama}</td>
+                <td>${supplier.noHp}</td>
+                <td>${supplier.perusahaan}</td>
+                <td>${supplier.alamat}</td>
+                <td>${supplier.status}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editSupplier(${index})"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusSupplier(${index})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Filter Supplier
+function filterSupplier() {
+    const filter = document.getElementById("filterSupplierStatus").value;
+    const filteredData = filter ? supplierData.filter((supplier) => supplier.status === filter) : supplierData;
+    const supplierTable = document.getElementById("supplierTable");
+    supplierTable.innerHTML = "";
+    filteredData.forEach((supplier, index) => {
+        supplierTable.innerHTML += `
+            <tr>
+                <td>${supplier.id}</td>
+                <td>${supplier.nama}</td>
+                <td>${supplier.noHp}</td>
+                <td>${supplier.perusahaan}</td>
+                <td>${supplier.alamat}</td>
+                <td>${supplier.status}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editSupplier(${index})"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusSupplier(${index})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Hapus Supplier
+function hapusSupplier(index) {
+    if (confirm("Yakin ingin menghapus supplier ini?")) {
+        supplierData.splice(index, 1);
+        tampilkanSupplier();
+    }
+}
+
+// Edit Supplier
+function editSupplier(index) {
+    const supplier = supplierData[index];
+    document.getElementById("namaSupplier").value = supplier.nama;
+    document.getElementById("noHpSupplier").value = supplier.noHp;
+    document.getElementById("namaPerusahaan").value = supplier.perusahaan;
+    document.getElementById("alamatSupplier").value = supplier.alamat;
+    document.getElementById("supplierSwitch").checked = supplier.status === "Aktif";
+    hapusSupplier(index);
+}

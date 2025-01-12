@@ -1,141 +1,155 @@
-let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
-let kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [];
-let supplierData = JSON.parse(localStorage.getItem("supplierData")) || [];
-let supplierData = JSON.parse(localStorage.getItem("itemData")) || [];
+let productIdCounter = JSON.parse(localStorage.getItem("productIdCounter")) || 1;
+let productData = JSON.parse(localStorage.getItem("productData")) || [];
+const categories = JSON.parse(localStorage.getItem("categories")) || [];
+const items = JSON.parse(localStorage.getItem("items")) || [];
+const suppliers = JSON.parse(localStorage.getItem("supplierData")) || [];
 
+// Fungsi untuk menghasilkan ID unik produk
+function generateProductId() {
+    const id = `PROD-${productIdCounter++}`;
+    localStorage.setItem("productIdCounter", JSON.stringify(productIdCounter));
+    return id;
+}
 
-function muatDropdowns() {
-    const kategoriDropdown = document.getElementById("kategori");
-    const supplierDropdown = document.getElementById("item");
-    const supplierDropdown = document.getElementById("supplier");
+// Fungsi untuk menyimpan data produk ke LocalStorage
+function saveToLocalStorage() {
+    localStorage.setItem("productData", JSON.stringify(productData));
+}
 
-    kategoriDropdown.innerHTML = `<option value="" disabled selected>Pilih kategori</option>`;
-    supplierDropdown.innerHTML = `<option value="" disabled selected>Pilih supplier</option>`;
-    itemDropdown.innerHTML = `<option value="" disabled selected>Pilih item</option>`;
-    kategoriData.forEach((kategori) => {
-        kategoriDropdown.innerHTML += `<option value="${kategori.id}">${kategori.nama}</option>`;
+// Mengisi dropdown kategori, item, dan supplier
+function populateDropdowns() {
+    const categorySelect = document.getElementById("categorySelect");
+    const itemSelect = document.getElementById("itemSelect");
+    const supplierSelect = document.getElementById("supplierSelect");
+
+    // Populate kategori
+    categorySelect.innerHTML = '<option value="" disabled selected>Pilih Kategori</option>';
+    categories.forEach((cat) => {
+        categorySelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
     });
 
-    supplierData.forEach((supplier) => {
-        supplierDropdown.innerHTML += `<option value="${supplier.id}">${supplier.nama}</option>`;
+    // Populate item
+    itemSelect.innerHTML = '<option value="" disabled selected>Pilih Item</option>';
+    items.forEach((item) => {
+        itemSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`;
     });
 
-    itemData.forEach((item) => {
-        itemDropdown.innerHTML += `<option value="${item.id}">${item.nama}</option>`;
+    // Populate supplier
+    supplierSelect.innerHTML = '<option value="" disabled selected>Pilih Supplier</option>';
+    suppliers.forEach((sup) => {
+        supplierSelect.innerHTML += `<option value="${sup.id}">${sup.nama}</option>`;
     });
 }
 
-// Tambah produk baru
-document.getElementById("produkForm").addEventListener("submit", function (e) {
+// Menangani Submit Form Produk
+document.getElementById("productForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
-    const namaProduk = document.getElementById("namaProduk").value.trim();
-    const kategoriId = document.getElementById("kategori").value;
-    const kategoriId = document.getElementById("item").value;
-    const harga = parseInt(document.getElementById("harga").value);
-    const stok = parseInt(document.getElementById("stok").value);
-    const supplierId = document.getElementById("supplier").value;
+    const id = document.getElementById("editProductId").value;
+    const name = document.getElementById("productName").value;
+    const categoryId = document.getElementById("categorySelect").value;
+    const category = categories.find((cat) => cat.id === categoryId).name;
+    const itemId = document.getElementById("itemSelect").value;
+    const item = items.find((item) => item.id === itemId).name;
+    const supplierId = document.getElementById("supplierSelect").value;
+    const supplier = suppliers.find((sup) => sup.id === supplierId).nama;
+    const price = document.getElementById("productPrice").value;
+    const stock = document.getElementById("productStock").value;
 
-    if (!namaProduk || !kategoriId || !itemId || harga < 0 || stok < 0 || !supplierId) {
-        tampilkanAlert("Semua bidang harus diisi dengan benar!", "danger");
-        return;
+    if (id) {
+        // Edit data
+        const productIndex = productData.findIndex((product) => product.id === id);
+        productData[productIndex] = { id, name, category, item, supplier, price, stock };
+        alertMessage("Produk berhasil diperbarui!", "success");
+    } else {
+        // Tambah data baru
+        const product = {
+            id: generateProductId(),
+            name,
+            category,
+            item,
+            supplier,
+            price,
+            stock,
+        };
+        productData.push(product);
+        alertMessage("Produk berhasil ditambahkan!", "success");
     }
 
-    const produkBaru = {
-        id: "PROD-" + Date.now(),
-        nama: namaProduk,
-        kategoriId: kategoriId,
-        kategoriId: itemId,
-        harga: harga,
-        stok: stok,
-        supplierId: supplierId,
-    };
-
-    produkData.push(produkBaru);
-    localStorage.setItem("produkData", JSON.stringify(produkData));
+    saveToLocalStorage();
     tampilkanProduk();
-    tampilkanAlert("Produk berhasil ditambahkan!", "success");
-    document.getElementById("produkForm").reset();
+    this.reset();
+    document.getElementById("cancelEditButton").classList.add("d-none");
+    document.getElementById("formTitle").textContent = "Form Produk";
 });
 
-// Tampilkan produk
-function tampilkanProduk(filter = "") {
-    const produkTable = document.getElementById("produkTable");
-    produkTable.innerHTML = "";
-
-    const produkTampil = produkData.filter((p) =>
-        p.nama.toLowerCase().includes(filter.toLowerCase())
-    );
-
-    produkTampil.forEach((produk) => {
-        const kategori = kategoriData.find((k) => k.id === produk.kategoriId);
-        const item = itemData.find((s) => s.id === produk.itemId);
-        const supplier = supplierData.find((s) => s.id === produk.supplierId);
-        
-        const stokClass = produk.stok <= 10 ? "text-danger" : "";
-        produkTable.innerHTML += `
+// Menampilkan Data Produk
+function tampilkanProduk() {
+    const productTable = document.getElementById("productTable");
+    productTable.innerHTML = "";
+    productData.forEach((product) => {
+        productTable.innerHTML += `
             <tr>
-                <td>${produk.id}</td>
-                <td>${produk.nama}</td>
-                <td>${kategori ? kategori.nama : "Tidak Ditemukan"}</td>
-                <td>${item ? item.nama : "Tidak Ditemukan"}</td>
-                <td>Rp${produk.harga}</td>
-                <td class="${stokClass}">${produk.stok}</td>
-                <td>${supplier ? supplier.nama : "Tidak Ditemukan"}</td>
+                <td>${product.id}</td>
+                <td>${product.name}</td>
+                <td>${product.category}</td>
+                <td>${product.item}</td>
+                <td>${product.supplier}</td>
+                <td>${product.price}</td>
+                <td>${product.stock}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editProduk('${produk.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="hapusProduk('${produk.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-warning btn-sm" onclick="editProduct('${product.id}')"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusProduk('${product.id}')"><i class="fas fa-trash"></i> Hapus</button>
                 </td>
             </tr>
         `;
     });
 }
 
-// Edit produk
-function editProduk(id) {
-    const produk = produkData.find((p) => p.id === id);
-    if (!produk) return;
-
-    document.getElementById("namaProduk").value = produk.nama;
-    document.getElementById("kategori").value = produk.kategoriId;
-    document.getElementById("item").value = produk.itemId;
-    document.getElementById("harga").value = produk.harga;
-    document.getElementById("stok").value = produk.stok;
-    document.getElementById("supplier").value = produk.supplierId;
-
-    produkData = produkData.filter((p) => p.id !== id);
-    localStorage.setItem("produkData", JSON.stringify(produkData));
-}
-
-// Hapus produk
+// Menghapus Data Produk
 function hapusProduk(id) {
-    produkData = produkData.filter((p) => p.id !== id);
-    localStorage.setItem("produkData", JSON.stringify(produkData));
+    productData = productData.filter((product) => product.id !== id);
+    saveToLocalStorage();
     tampilkanProduk();
-    tampilkanAlert("Produk berhasil dihapus!", "success");
+    alertMessage("Produk berhasil dihapus!", "danger");
 }
 
-// Tampilkan alert
-function tampilkanAlert(message, type) {
-    const alertContainer = document.getElementById("alertContainer");
-    alertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
+// Mengedit Data Produk
+function editProduct(id) {
+    const product = productData.find((p) => p.id === id);
 
+    document.getElementById("editProductId").value = product.id;
+    document.getElementById("productName").value = product.name;
+    document.getElementById("categorySelect").value = categories.find((cat) => cat.name === product.category).id;
+    document.getElementById("itemSelect").value = items.find((item) => item.name === product.item).id;
+    document.getElementById("supplierSelect").value = suppliers.find((sup) => sup.nama === product.supplier).id;
+    document.getElementById("productPrice").value = product.price;
+    document.getElementById("productStock").value = product.stock;
+
+    document.getElementById("formTitle").textContent = "Edit Produk";
+    document.getElementById("cancelEditButton").classList.remove("d-none");
+}
+
+// Membatalkan Edit
+document.getElementById("cancelEditButton").addEventListener("click", function () {
+    document.getElementById("productForm").reset();
+    document.getElementById("editProductId").value = "";
+    document.getElementById("formTitle").textContent = "Form Produk";
+    this.classList.add("d-none");
+});
+
+// Menampilkan Alert
+function alertMessage(message, type) {
+    const alertContainer = document.getElementById("alertContainer");
+    alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>`;
     setTimeout(() => {
         alertContainer.innerHTML = "";
     }, 3000);
 }
 
-// Cari produk
-document.getElementById("searchProduk").addEventListener("input", function () {
-    tampilkanProduk(this.value);
-});
-
-document.addEventListener("DOMContentLoaded", function () { muatDropdowns(); tampilkanProduk(); });
-
-muatDropdowns();
+// Inisialisasi
+populateDropdowns();
 tampilkanProduk();

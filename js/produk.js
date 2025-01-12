@@ -1,129 +1,112 @@
-// Variabel penyimpanan data
-let produkIdCounter = JSON.parse(localStorage.getItem("produkIdCounter")) || 1;
+// Inisialisasi Data Produk
 let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
-let kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [
-    
-];
-let itemData = JSON.parse(localStorage.getItem("itemData")) || [
 
-];
-let supplierData = JSON.parse(localStorage.getItem("supplierData")) || [
-
-];
-
-// Fungsi untuk menghasilkan ID unik
-function generateProdukId() {
-    const id = `PROD-${produkIdCounter++}`;
-    localStorage.setItem("produkIdCounter", JSON.stringify(produkIdCounter)); // Simpan ID counter
-    return id;
-}
-
-// Fungsi untuk menyimpan produk ke LocalStorage
-function saveToLocalStorage() {
-    localStorage.setItem("produkData", JSON.stringify(produkData));
-}
-
-// Mengisi dropdown kategori, item, dan supplier
-function populateDropdowns() {
+// Fungsi untuk memuat dropdown
+function populateProdukDropdowns() {
     const kategoriSelect = document.getElementById("kategoriProduk");
     const itemSelect = document.getElementById("itemProduk");
     const supplierSelect = document.getElementById("supplierProduk");
 
-    kategoriSelect.innerHTML = kategoriData.map(k => `<option value="${k.id}">${k.nama}</option>`).join("");
-    itemSelect.innerHTML = itemData.map(i => `<option value="${i.id}">${i.nama}</option>`).join("");
-    supplierSelect.innerHTML = supplierData.map(s => `<option value="${s.id}">${s.nama}</option>`).join("");
+    // Ambil data dari LocalStorage
+    const kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [];
+    const itemData = JSON.parse(localStorage.getItem("itemData")) || [];
+    const supplierData = JSON.parse(localStorage.getItem("supplierData")) || [];
+
+    // Isi dropdown
+    kategoriSelect.innerHTML = kategoriData.map(
+        kategori => `<option value="${kategori.id}">${kategori.nama}</option>`
+    ).join("");
+
+    itemSelect.innerHTML = itemData.map(
+        item => `<option value="${item.id}">${item.nama}</option>`
+    ).join("");
+
+    supplierSelect.innerHTML = supplierData.map(
+        supplier => `<option value="${supplier.id}">${supplier.nama}</option>`
+    ).join("");
 }
 
-// Menangani submit form produk
-document.getElementById("produkForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+// Fungsi untuk menyimpan produk
+function simpanProduk(event) {
+    event.preventDefault();
 
-    const editProdukId = document.getElementById("editProdukId").value;
+    const id = `PROD-${Date.now()}`;
+    const nama = document.getElementById("namaProduk").value;
+    const kategori = document.getElementById("kategoriProduk").value;
+    const item = document.getElementById("itemProduk").value;
+    const supplier = document.getElementById("supplierProduk").value;
+    const harga = parseFloat(document.getElementById("hargaProduk").value);
+    const stok = parseInt(document.getElementById("stokProduk").value);
+    const diskonAktif = document.getElementById("diskonSwitch").checked;
+    const tipeDiskon = document.getElementById("tipeDiskon").value;
+    const nilaiDiskon = parseFloat(document.getElementById("nilaiDiskon").value) || 0;
 
-    const produk = {
-        id: editProdukId || generateProdukId(),
-        nama: document.getElementById("namaProduk").value,
-        kategori: document.getElementById("kategoriProduk").value,
-        item: document.getElementById("itemProduk").value,
-        supplier: document.getElementById("supplierProduk").value,
-        harga: parseFloat(document.getElementById("hargaProduk").value),
-        stok: parseInt(document.getElementById("stokProduk").value, 10),
-    };
-
-    if (editProdukId) {
-        const index = produkData.findIndex(p => p.id === editProdukId);
-        produkData[index] = produk;
-        document.getElementById("saveProdukButton").innerHTML = '<i class="fas fa-save"></i> Simpan Produk';
-    } else {
-        produkData.push(produk);
+    let hargaDiskon = harga;
+    if (diskonAktif) {
+        hargaDiskon = tipeDiskon === "rupiah" ? harga - nilaiDiskon : harga - (harga * (nilaiDiskon / 100));
+        if (hargaDiskon < 0) hargaDiskon = 0;
     }
 
-    saveToLocalStorage();
-    tampilkanProduk();
-    alertMessage("Produk berhasil disimpan!", "success");
-    this.reset();
-});
+    produkData.push({
+        id,
+        nama,
+        kategori,
+        item,
+        supplier,
+        harga,
+        stok,
+        diskonAktif,
+        tipeDiskon,
+        nilaiDiskon,
+        hargaDiskon
+    });
 
-// Menampilkan daftar produk
-function tampilkanProduk() {
-    const produkTable = document.getElementById("produkTable");
-    produkTable.innerHTML = produkData.map(produk => {
-        const kategori = kategoriData.find(k => k.id === produk.kategori)?.nama || "Tidak Diketahui";
-        const item = itemData.find(i => i.id === produk.item)?.nama || "Tidak Diketahui";
-        const supplier = supplierData.find(s => s.id === produk.supplier)?.nama || "Tidak Diketahui";
+    localStorage.setItem("produkData", JSON.stringify(produkData));
+    document.getElementById("formProduk").reset();
+    updateTabelProduk();
+}
 
-        return `
+// Fungsi untuk memperbarui tabel produk
+function updateTabelProduk() {
+    const tabelBody = document.querySelector("#tabelProduk tbody");
+    tabelBody.innerHTML = "";
+
+    produkData.forEach((produk, index) => {
+        const row = `
             <tr>
-                <td>${produk.id}</td>
+                <td>${index + 1}</td>
                 <td>${produk.nama}</td>
-                <td>${kategori}</td>
-                <td>${item}</td>
-                <td>${supplier}</td>
+                <td>${produk.kategori}</td>
+                <td>${produk.item}</td>
+                <td>${produk.supplier}</td>
                 <td>Rp ${produk.harga.toLocaleString()}</td>
                 <td>${produk.stok}</td>
+                <td>Rp ${produk.hargaDiskon.toLocaleString()}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editProduk('${produk.id}')"><i class="fas fa-edit"></i> Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="hapusProduk('${produk.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                    <button class="btn btn-warning btn-sm" onclick="editProduk('${produk.id}')">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusProduk('${produk.id}')">Hapus</button>
                 </td>
             </tr>
         `;
-    }).join("");
+        tabelBody.innerHTML += row;
+    });
 }
 
-// Menghapus produk
+// Fungsi untuk menghapus produk
 function hapusProduk(id) {
-    if (confirm("Yakin ingin menghapus produk ini?")) {
-        produkData = produkData.filter(p => p.id !== id);
-        saveToLocalStorage();
-        tampilkanProduk();
-        alertMessage("Produk berhasil dihapus!", "danger");
-    }
+    produkData = produkData.filter(produk => produk.id !== id);
+    localStorage.setItem("produkData", JSON.stringify(produkData));
+    updateTabelProduk();
 }
 
-// Mengedit produk
-function editProduk(id) {
-    const produk = produkData.find(p => p.id === id);
-    document.getElementById("editProdukId").value = produk.id;
-    document.getElementById("namaProduk").value = produk.nama;
-    document.getElementById("kategoriProduk").value = produk.kategori;
-    document.getElementById("itemProduk").value = produk.item;
-    document.getElementById("supplierProduk").value = produk.supplier;
-    document.getElementById("hargaProduk").value = produk.harga;
-    document.getElementById("stokProduk").value = produk.stok;
-    document.getElementById("saveProdukButton").innerHTML = '<i class="fas fa-save"></i> Perbarui Produk';
-}
+// Event Listeners
+document.getElementById("formProduk").addEventListener("submit", simpanProduk);
+document.getElementById("diskonSwitch").addEventListener("change", function () {
+    const isChecked = this.checked;
+    document.getElementById("tipeDiskon").disabled = !isChecked;
+    document.getElementById("nilaiDiskon").disabled = !isChecked;
+});
 
-// Menampilkan alert
-function alertMessage(message, type) {
-    const alertContainer = document.getElementById("alertContainer");
-    alertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
-}
-
-// Inisialisasi
-populateDropdowns();
-tampilkanProduk();
+// Panggil fungsi saat halaman dimuat
+populateProdukDropdowns();
+updateTabelProduk();

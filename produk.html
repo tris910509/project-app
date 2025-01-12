@@ -28,10 +28,18 @@
                                 <option value="" disabled selected>Pilih kategori</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="item" class="form-label">Kategori</label>
+                            <label for="item" class="form-label">Item</label>
                             <select class="form-select" id="item" required>
                                 <option value="" disabled selected>Pilih item</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="supplier" class="form-label">Supplier</label>
+                            <select class="form-select" id="supplier" required>
+                                <option value="" disabled selected>Pilih supplier</option>
                             </select>
                         </div>
                     </div>
@@ -45,10 +53,22 @@
                             <input type="number" class="form-control" id="stok" min="0" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="supplier" class="form-label">Supplier</label>
-                            <select class="form-select" id="supplier" required>
-                                <option value="" disabled selected>Pilih supplier</option>
+                            <label for="diskonTipe" class="form-label">Tipe Diskon</label>
+                            <select class="form-select" id="diskonTipe" required>
+                                <option value="" selected>Tidak Ada</option>
+                                <option value="Rupiah">Rupiah</option>
+                                <option value="Persen">Persen</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="diskon" class="form-label">Nominal Diskon</label>
+                            <input type="number" class="form-control" id="diskon" min="0" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="hargaAkhir" class="form-label">Harga Akhir</label>
+                            <input type="number" class="form-control" id="hargaAkhir" readonly>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Simpan Produk</button>
@@ -69,6 +89,8 @@
                             <th>Kategori</th>
                             <th>Item</th>
                             <th>Harga</th>
+                            <th>Diskon</th>
+                            <th>Harga Akhir</th>
                             <th>Stok</th>
                             <th>Supplier</th>
                             <th>Aksi</th>

@@ -1,47 +1,49 @@
+// Variabel untuk menyimpan ID item yang unik dan data item
 let itemIdCounter = JSON.parse(localStorage.getItem("itemIdCounter")) || 1;
 let itemData = JSON.parse(localStorage.getItem("itemData")) || [];
 
-// ID Generator
+// Fungsi untuk menghasilkan ID unik untuk setiap item
 function generateItemId() {
     const id = `ITEM-${itemIdCounter++}`;
-    localStorage.setItem("itemIdCounter", JSON.stringify(itemIdCounter));
+    localStorage.setItem("itemIdCounter", JSON.stringify(itemIdCounter));  // Update counter ID
     return id;
 }
 
-// Simpan Data ke Local Storage
+// Fungsi untuk menyimpan data item ke LocalStorage
 function saveToLocalStorage() {
     localStorage.setItem("itemData", JSON.stringify(itemData));
 }
 
-// Tambahkan Item
+// Menangani event submit form item
 document.getElementById("itemForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    const editItemId = document.getElementById("editItemId").value;
+
+    const editItemId = document.getElementById("editItemId").value;  // Ambil ID item jika sedang diedit
 
     const item = {
-        id: editItemId || generateItemId(),
-        nama: document.getElementById("namaItem").value,
-        status: document.getElementById("statusItem").checked ? "Aktif" : "Nonaktif",
+        id: editItemId || generateItemId(),  // Jika sedang mengedit, gunakan ID yang sudah ada
+        nama: document.getElementById("namaItem").value,  // Nama item dari input
+        status: document.getElementById("statusItem").checked ? "Aktif" : "Nonaktif",  // Status item dari switch
     };
 
     if (editItemId) {
-        const index = itemData.findIndex((i) => i.id === editItemId);
-        itemData[index] = item;
+        const index = itemData.findIndex((i) => i.id === editItemId);  // Cari item yang sedang diedit
+        itemData[index] = item;  // Update item yang diedit
         document.getElementById("saveItemButton").innerHTML = '<i class="fas fa-save"></i> Simpan Item';
     } else {
-        itemData.push(item);
+        itemData.push(item);  // Tambahkan item baru ke array itemData
     }
 
-    saveToLocalStorage();
-    tampilkanItem();
-    alert("Item berhasil disimpan!");
-    this.reset();
-}
+    saveToLocalStorage();  // Simpan data ke LocalStorage
+    tampilkanItem();  // Tampilkan item yang sudah diupdate
+    alertMessage("Item berhasil disimpan!", "success");  // Menampilkan alert sukses
+    this.reset();  // Reset form setelah simpan
+});
 
-// Tampilkan Item
+// Menampilkan daftar item dalam tabel
 function tampilkanItem() {
     const itemTable = document.getElementById("itemTable");
-    itemTable.innerHTML = "";
+    itemTable.innerHTML = "";  // Kosongkan tabel sebelum menampilkan data
     itemData.forEach((item, index) => {
         itemTable.innerHTML += `
             <tr>
@@ -49,30 +51,43 @@ function tampilkanItem() {
                 <td>${item.nama}</td>
                 <td>${item.status}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editItem(${index})"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="hapusItem(${index})"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-warning btn-sm" onclick="editItem(${index})"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusItem(${index})"><i class="fas fa-trash"></i> Hapus</button>
                 </td>
             </tr>
         `;
     });
 }
 
-// Hapus Item
+// Menghapus item
 function hapusItem(index) {
     if (confirm("Yakin ingin menghapus item ini?")) {
-        itemData.splice(index, 1);
-        saveToLocalStorage();
-        tampilkanItem();
+        itemData.splice(index, 1);  // Hapus item dari array
+        saveToLocalStorage();  // Simpan perubahan ke LocalStorage
+        tampilkanItem();  // Tampilkan item yang telah diperbarui
+        alertMessage("Item berhasil dihapus!", "danger");  // Menampilkan alert sukses
     }
 }
 
-// Edit Item
+// Mengedit item
 function editItem(index) {
     const item = itemData[index];
-    document.getElementById("editItemId").value = item.id;
-    document.getElementById("namaItem").value = item.nama;
-    document.getElementById("statusItem").checked = item.status === "Aktif";
-    document.getElementById("saveItemButton").innerHTML = '<i class="fas fa-save"></i> Perbarui Item';
+    document.getElementById("editItemId").value = item.id;  // Set ID item yang sedang diedit
+    document.getElementById("namaItem").value = item.nama;  // Set nama item
+    document.getElementById("statusItem").checked = item.status === "Aktif";  // Set status item
+    document.getElementById("saveItemButton").innerHTML = '<i class="fas fa-save"></i> Perbarui Item';  // Ganti tombol jadi perbarui
 }
 
+// Menampilkan alert
+function alertMessage(message, type) {
+    const alertContainer = document.getElementById("alertContainer");
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+}
+
+// Menampilkan daftar item ketika halaman dimuat
 tampilkanItem();

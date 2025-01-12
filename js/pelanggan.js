@@ -1,101 +1,87 @@
-let pelangganData = [];
-let pelangganIdCounter = 1;
+let pelangganIdCounter = JSON.parse(localStorage.getItem("pelangganIdCounter")) || 1;
+let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
 
-// Fungsi Membuat ID Pelanggan Unik
-function generateIdPelanggan() {
-    return `CUST-${pelangganIdCounter++}`;
+// Fungsi untuk menghasilkan ID unik pelanggan
+function generatePelangganId() {
+    const id = `PLGN-${pelangganIdCounter++}`;
+    localStorage.setItem("pelangganIdCounter", JSON.stringify(pelangganIdCounter));
+    return id;
 }
 
-// Tambahkan Pelanggan Baru
+// Fungsi untuk menyimpan data pelanggan ke LocalStorage
+function saveToLocalStorage() {
+    localStorage.setItem("pelangganData", JSON.stringify(pelangganData));
+}
+
+// Event Listener untuk Switch Diskon
+document.getElementById("diskonSwitch").addEventListener("change", function () {
+    document.getElementById("diskonFields").style.display = this.checked ? "block" : "none";
+    document.getElementById("nilaiDiskon").value = "";
+});
+
+// Menangani Submit Form Pelanggan
 document.getElementById("pelangganForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
     const pelanggan = {
-        id: generateIdPelanggan(),
+        id: generatePelangganId(),
         nama: document.getElementById("namaPelanggan").value,
         peran: document.getElementById("peranPelanggan").value,
-        noHandphone: document.getElementById("noHandphone").value,
+        noHp: document.getElementById("noHpPelanggan").value,
         alamat: document.getElementById("alamatPelanggan").value,
-        status: document.getElementById("statusSwitch").checked ? "Aktif" : "Nonaktif",
+        diskon: document.getElementById("diskonSwitch").checked
+            ? {
+                jenis: document.getElementById("jenisDiskon").value,
+                nilai: document.getElementById("nilaiDiskon").value,
+            }
+            : null,
+        status: document.getElementById("statusPelanggan").checked ? "Aktif" : "Nonaktif",
     };
 
     pelangganData.push(pelanggan);
-    tampilkanAlert("Pelanggan berhasil ditambahkan!", "success");
+    saveToLocalStorage();
     tampilkanPelanggan();
     this.reset();
+    document.getElementById("diskonFields").style.display = "none";
 });
 
-// Tampilkan Daftar Pelanggan
+// Menampilkan Data Pelanggan
 function tampilkanPelanggan() {
     const pelangganTable = document.getElementById("pelangganTable");
     pelangganTable.innerHTML = "";
-
-    pelangganData.forEach((pelanggan, index) => {
+    pelangganData.forEach((pelanggan) => {
         pelangganTable.innerHTML += `
             <tr>
                 <td>${pelanggan.id}</td>
                 <td>${pelanggan.nama}</td>
                 <td>${pelanggan.peran}</td>
-                <td>${pelanggan.noHandphone}</td>
+                <td>${pelanggan.noHp}</td>
                 <td>${pelanggan.alamat}</td>
+                <td>${pelanggan.diskon ? `${pelanggan.diskon.nilai} ${pelanggan.diskon.jenis}` : "Tidak Ada"}</td>
                 <td>${pelanggan.status}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editPelanggan(${index})"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="hapusPelanggan(${index})"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusPelanggan('${pelanggan.id}')"><i class="fas fa-trash"></i> Hapus</button>
                 </td>
             </tr>
         `;
     });
 }
 
-// Hapus Pelanggan
-function hapusPelanggan(index) {
-    pelangganData.splice(index, 1);
-    tampilkanAlert("Pelanggan berhasil dihapus!", "danger");
+// Menghapus Data Pelanggan
+function hapusPelanggan(id) {
+    pelangganData = pelangganData.filter((p) => p.id !== id);
+    saveToLocalStorage();
     tampilkanPelanggan();
 }
 
-// Filter Pelanggan
-function filterPelanggan() {
-    const peranFilter = document.getElementById("filterPeran").value;
-    const statusFilter = document.getElementById("filterStatus").value;
+// Menangani Filter Pelanggan
+document.getElementById("filterInput").addEventListener("input", function () {
+    const filterValue = this.value.toLowerCase();
+    const filteredData = pelangganData.filter((pelanggan) =>
+        pelanggan.nama.toLowerCase().includes(filterValue)
+    );
+    tampilkanPelanggan(filteredData);
+});
 
-    const pelangganTable = document.getElementById("pelangganTable");
-    pelangganTable.innerHTML = "";
-
-    pelangganData
-        .filter((pelanggan) => 
-            (!peranFilter || pelanggan.peran === peranFilter) &&
-            (!statusFilter || pelanggan.status === statusFilter)
-        )
-        .forEach((pelanggan, index) => {
-            pelangganTable.innerHTML += `
-                <tr>
-                    <td>${pelanggan.id}</td>
-                    <td>${pelanggan.nama}</td>
-                    <td>${pelanggan.peran}</td>
-                    <td>${pelanggan.noHandphone}</td>
-                    <td>${pelanggan.alamat}</td>
-                    <td>${pelanggan.status}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick="editPelanggan(${index})"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-danger btn-sm" onclick="hapusPelanggan(${index})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `;
-        });
-}
-
-// Tampilkan Alert
-function tampilkanAlert(message, type) {
-    const alertContainer = document.getElementById("alertContainer");
-    alertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
-    setTimeout(() => {
-        alertContainer.innerHTML = "";
-    }, 3000);
-}
+// Inisialisasi Data
+tampilkanPelanggan();

@@ -1,33 +1,42 @@
-let supplierData = [];
-let supplierIdCounter = 1;
+let supplierIdCounter = JSON.parse(localStorage.getItem("supplierIdCounter")) || 1;
+let supplierData = JSON.parse(localStorage.getItem("supplierData")) || [];
 
-// ID Generator
+// Fungsi untuk menghasilkan ID unik supplier
 function generateSupplierId() {
-    return `SUP-${supplierIdCounter++}`;
+    const id = `SUP-${supplierIdCounter++}`;
+    localStorage.setItem("supplierIdCounter", JSON.stringify(supplierIdCounter));
+    return id;
 }
 
-// Tambahkan Supplier
+// Fungsi untuk menyimpan data supplier ke LocalStorage
+function saveToLocalStorage() {
+    localStorage.setItem("supplierData", JSON.stringify(supplierData));
+}
+
+// Menangani Submit Form Supplier
 document.getElementById("supplierForm").addEventListener("submit", function (e) {
     e.preventDefault();
+
     const supplier = {
         id: generateSupplierId(),
         nama: document.getElementById("namaSupplier").value,
         noHp: document.getElementById("noHpSupplier").value,
         perusahaan: document.getElementById("namaPerusahaan").value,
         alamat: document.getElementById("alamatSupplier").value,
-        status: document.getElementById("supplierSwitch").checked ? "Aktif" : "Nonaktif",
+        status: document.getElementById("statusSupplier").checked ? "Aktif" : "Nonaktif",
     };
+
     supplierData.push(supplier);
+    saveToLocalStorage();
     tampilkanSupplier();
-    alert("Supplier berhasil ditambahkan!");
     this.reset();
 });
 
-// Tampilkan Supplier
+// Menampilkan Data Supplier
 function tampilkanSupplier() {
     const supplierTable = document.getElementById("supplierTable");
     supplierTable.innerHTML = "";
-    supplierData.forEach((supplier, index) => {
+    supplierData.forEach((supplier) => {
         supplierTable.innerHTML += `
             <tr>
                 <td>${supplier.id}</td>
@@ -37,53 +46,28 @@ function tampilkanSupplier() {
                 <td>${supplier.alamat}</td>
                 <td>${supplier.status}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editSupplier(${index})"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="hapusSupplier(${index})"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusSupplier('${supplier.id}')"><i class="fas fa-trash"></i> Hapus</button>
                 </td>
             </tr>
         `;
     });
 }
 
-// Filter Supplier
-function filterSupplier() {
-    const filter = document.getElementById("filterSupplierStatus").value;
-    const filteredData = filter ? supplierData.filter((supplier) => supplier.status === filter) : supplierData;
-    const supplierTable = document.getElementById("supplierTable");
-    supplierTable.innerHTML = "";
-    filteredData.forEach((supplier, index) => {
-        supplierTable.innerHTML += `
-            <tr>
-                <td>${supplier.id}</td>
-                <td>${supplier.nama}</td>
-                <td>${supplier.noHp}</td>
-                <td>${supplier.perusahaan}</td>
-                <td>${supplier.alamat}</td>
-                <td>${supplier.status}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm" onclick="editSupplier(${index})"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="hapusSupplier(${index})"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `;
-    });
+// Menghapus Data Supplier
+function hapusSupplier(id) {
+    supplierData = supplierData.filter((s) => s.id !== id);
+    saveToLocalStorage();
+    tampilkanSupplier();
 }
 
-// Hapus Supplier
-function hapusSupplier(index) {
-    if (confirm("Yakin ingin menghapus supplier ini?")) {
-        supplierData.splice(index, 1);
-        tampilkanSupplier();
-    }
-}
+// Menangani Filter Supplier
+document.getElementById("filterInput").addEventListener("input", function () {
+    const filterValue = this.value.toLowerCase();
+    const filteredData = supplierData.filter((supplier) =>
+        supplier.nama.toLowerCase().includes(filterValue)
+    );
+    tampilkanSupplier(filteredData);
+});
 
-// Edit Supplier
-function editSupplier(index) {
-    const supplier = supplierData[index];
-    document.getElementById("namaSupplier").value = supplier.nama;
-    document.getElementById("noHpSupplier").value = supplier.noHp;
-    document.getElementById("namaPerusahaan").value = supplier.perusahaan;
-    document.getElementById("alamatSupplier").value = supplier.alamat;
-    document.getElementById("supplierSwitch").checked = supplier.status === "Aktif";
-    hapusSupplier(index);
-}
+// Inisialisasi Data
+tampilkanSupplier();

@@ -1,60 +1,101 @@
-let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
+// Data Dummy
+let pelangganData = [];
 
-// Fungsi untuk memuat data pelanggan
-function muatPelanggan() {
-    const tabelPelanggan = document.getElementById("tabelPelanggan").getElementsByTagName('tbody')[0];
-    tabelPelanggan.innerHTML = "";
+// Simpan Pelanggan
+document.getElementById("pelangganForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const pelanggan = {
+        id: "PLGN-" + Date.now(),
+        nama: document.getElementById("namaPelanggan").value,
+        email: document.getElementById("emailPelanggan").value,
+        tanggalLahir: document.getElementById("tanggalLahir").value,
+        noHandphone: document.getElementById("noHandphone").value,
+        alamat: document.getElementById("alamatPelanggan").value,
+    };
+
+    pelangganData.push(pelanggan);
+    tampilkanPelanggan();
+    this.reset();
+    tampilkanAlert("Pelanggan berhasil ditambahkan!", "success");
+});
+
+// Tampilkan Pelanggan
+function tampilkanPelanggan() {
+    const pelangganTable = document.getElementById("pelangganTable");
+    pelangganTable.innerHTML = "";
 
     pelangganData.forEach((pelanggan, index) => {
-        const row = tabelPelanggan.insertRow();
-        row.innerHTML = `
-            <td>${pelanggan.nama}</td>
-            <td>${pelanggan.email}</td>
-            <td>${pelanggan.peran}</td>
-            <td>${pelanggan.diskon} ${pelanggan.diskonTipe}</td>
-            <td>${pelanggan.keterangan || '-'}</td>
-            <td><button class="btn btn-danger" onclick="hapusPelanggan(${index})">Hapus</button></td>
+        pelangganTable.innerHTML += `
+            <tr>
+                <td>${pelanggan.id}</td>
+                <td>${pelanggan.nama}</td>
+                <td>${pelanggan.email}</td>
+                <td>${pelanggan.tanggalLahir}</td>
+                <td>${pelanggan.noHandphone}</td>
+                <td>${pelanggan.alamat}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editPelanggan(${index})"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusPelanggan(${index})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
         `;
     });
 }
 
-// Fungsi untuk menambah pelanggan baru
-function simpanPelanggan(event) {
-    event.preventDefault();
+// Edit Pelanggan
+function editPelanggan(index) {
+    const pelanggan = pelangganData[index];
+    document.getElementById("namaPelanggan").value = pelanggan.nama;
+    document.getElementById("emailPelanggan").value = pelanggan.email;
+    document.getElementById("tanggalLahir").value = pelanggan.tanggalLahir;
+    document.getElementById("noHandphone").value = pelanggan.noHandphone;
+    document.getElementById("alamatPelanggan").value = pelanggan.alamat;
 
-    const nama = document.getElementById("namaPelanggan").value;
-    const email = document.getElementById("emailPelanggan").value;
-    const peran = document.getElementById("peranPelanggan").value;
-    const diskon = parseFloat(document.getElementById("diskonPelanggan").value) || 0;
-    const diskonSwitch = document.getElementById("diskonSwitch").checked;
-    const keterangan = document.getElementById("keteranganPelanggan").value;
-
-    const diskonTipe = diskonSwitch ? "Rupiah" : "Persen";
-
-    if (!nama || !email || isNaN(diskon)) {
-        tampilkanAlert("Semua field harus diisi dengan benar.", "danger");
-        return;
-    }
-
-    // Simpan data pelanggan
-    const pelanggan = { nama, email, peran, diskon, diskonTipe, keterangan };
-    pelangganData.push(pelanggan);
-    localStorage.setItem("pelangganData", JSON.stringify(pelangganData));
-
-    tampilkanAlert("Data pelanggan berhasil disimpan.", "success");
-    muatPelanggan();
-
-    document.getElementById("formPelanggan").reset();
+    pelangganData.splice(index, 1);
+    tampilkanPelanggan();
+    tampilkanAlert("Silakan edit data pelanggan di formulir!", "info");
 }
 
-// Fungsi untuk menghapus pelanggan
+// Hapus Pelanggan
 function hapusPelanggan(index) {
     pelangganData.splice(index, 1);
-    localStorage.setItem("pelangganData", JSON.stringify(pelangganData));
-    muatPelanggan();
+    tampilkanPelanggan();
+    tampilkanAlert("Pelanggan berhasil dihapus!", "danger");
 }
 
-// Fungsi untuk menampilkan alert
+// Cari Pelanggan
+document.getElementById("searchPelanggan").addEventListener("input", function () {
+    const keyword = this.value.toLowerCase();
+    const filteredData = pelangganData.filter((pelanggan) =>
+        pelanggan.nama.toLowerCase().includes(keyword)
+    );
+    tampilkanPelangganFiltered(filteredData);
+});
+
+function tampilkanPelangganFiltered(filteredData) {
+    const pelangganTable = document.getElementById("pelangganTable");
+    pelangganTable.innerHTML = "";
+
+    filteredData.forEach((pelanggan) => {
+        pelangganTable.innerHTML += `
+            <tr>
+                <td>${pelanggan.id}</td>
+                <td>${pelanggan.nama}</td>
+                <td>${pelanggan.email}</td>
+                <td>${pelanggan.tanggalLahir}</td>
+                <td>${pelanggan.noHandphone}</td>
+                <td>${pelanggan.alamat}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Tampilkan Alert
 function tampilkanAlert(message, type) {
     const alertContainer = document.getElementById("alertContainer");
     alertContainer.innerHTML = `
@@ -63,24 +104,10 @@ function tampilkanAlert(message, type) {
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     `;
-
     setTimeout(() => {
         alertContainer.innerHTML = "";
     }, 3000);
 }
 
-// Fungsi untuk toggle tipe diskon (Rupiah/Persen)
-function toggleDiskonType() {
-    const diskonSwitch = document.getElementById("diskonSwitch");
-    const diskonLabel = diskonSwitch.nextElementSibling;
-
-    if (diskonSwitch.checked) {
-        diskonLabel.innerText = "Rupiah";
-    } else {
-        diskonLabel.innerText = "Persen";
-    }
-}
-
-// Muat pelanggan saat halaman pertama kali dimuat
-muatPelanggan();
-tampilkanPelanggan();
+// Muat Data Awal
+document.addEventListener("DOMContentLoaded", tampilkanPelanggan);

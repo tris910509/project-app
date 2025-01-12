@@ -17,16 +17,34 @@ function saveToLocalStorage() {
 document.getElementById("supplierForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
-    const supplier = {
-        id: generateSupplierId(),
-        nama: document.getElementById("namaSupplier").value,
-        noHp: document.getElementById("noHpSupplier").value,
-        perusahaan: document.getElementById("namaPerusahaan").value,
-        alamat: document.getElementById("alamatSupplier").value,
-        status: document.getElementById("statusSupplier").checked ? "Aktif" : "Nonaktif",
-    };
+    const id = document.getElementById("editSupplierId").value;
+    const nama = document.getElementById("namaSupplier").value;
+    const noHp = document.getElementById("noHpSupplier").value;
+    const perusahaan = document.getElementById("namaPerusahaan").value;
+    const alamat = document.getElementById("alamatSupplier").value;
+    const status = document.getElementById("statusSupplier").checked ? "Aktif" : "Nonaktif";
 
-    supplierData.push(supplier);
+    if (id) {
+        // Edit data
+        const supplierIndex = supplierData.findIndex((supplier) => supplier.id === id);
+        supplierData[supplierIndex] = { id, nama, noHp, perusahaan, alamat, status };
+        document.getElementById("formTitle").textContent = "Form Supplier";
+        document.getElementById("cancelEditButton").classList.add("d-none");
+        alertMessage("Data supplier berhasil diperbarui!", "success");
+    } else {
+        // Tambah data baru
+        const supplier = {
+            id: generateSupplierId(),
+            nama,
+            noHp,
+            perusahaan,
+            alamat,
+            status,
+        };
+        supplierData.push(supplier);
+        alertMessage("Supplier berhasil ditambahkan!", "success");
+    }
+
     saveToLocalStorage();
     tampilkanSupplier();
     this.reset();
@@ -46,6 +64,7 @@ function tampilkanSupplier() {
                 <td>${supplier.alamat}</td>
                 <td>${supplier.status}</td>
                 <td>
+                    <button class="btn btn-warning btn-sm" onclick="editSupplier('${supplier.id}')"><i class="fas fa-edit"></i> Edit</button>
                     <button class="btn btn-danger btn-sm" onclick="hapusSupplier('${supplier.id}')"><i class="fas fa-trash"></i> Hapus</button>
                 </td>
             </tr>
@@ -58,16 +77,43 @@ function hapusSupplier(id) {
     supplierData = supplierData.filter((s) => s.id !== id);
     saveToLocalStorage();
     tampilkanSupplier();
+    alertMessage("Supplier berhasil dihapus!", "danger");
 }
 
-// Menangani Filter Supplier
-document.getElementById("filterInput").addEventListener("input", function () {
-    const filterValue = this.value.toLowerCase();
-    const filteredData = supplierData.filter((supplier) =>
-        supplier.nama.toLowerCase().includes(filterValue)
-    );
-    tampilkanSupplier(filteredData);
+// Mengedit Data Supplier
+function editSupplier(id) {
+    const supplier = supplierData.find((s) => s.id === id);
+
+    document.getElementById("editSupplierId").value = supplier.id;
+    document.getElementById("namaSupplier").value = supplier.nama;
+    document.getElementById("noHpSupplier").value = supplier.noHp;
+    document.getElementById("namaPerusahaan").value = supplier.perusahaan;
+    document.getElementById("alamatSupplier").value = supplier.alamat;
+    document.getElementById("statusSupplier").checked = supplier.status === "Aktif";
+
+    document.getElementById("formTitle").textContent = "Edit Supplier";
+    document.getElementById("cancelEditButton").classList.remove("d-none");
+}
+
+// Membatalkan Edit
+document.getElementById("cancelEditButton").addEventListener("click", function () {
+    document.getElementById("supplierForm").reset();
+    document.getElementById("editSupplierId").value = "";
+    document.getElementById("formTitle").textContent = "Form Supplier";
+    this.classList.add("d-none");
 });
+
+// Menampilkan Alert
+function alertMessage(message, type) {
+    const alertContainer = document.getElementById("alertContainer");
+    alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>`;
+    setTimeout(() => {
+        alertContainer.innerHTML = "";
+    }, 3000);
+}
 
 // Inisialisasi Data
 tampilkanSupplier();

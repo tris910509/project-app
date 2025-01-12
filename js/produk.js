@@ -3,6 +3,7 @@ let kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [];
 let supplierData = JSON.parse(localStorage.getItem("supplierData")) || [];
 let supplierData = JSON.parse(localStorage.getItem("itemData")) || [];
 
+
 function muatDropdowns() {
     const kategoriDropdown = document.getElementById("kategori");
     const supplierDropdown = document.getElementById("item");
@@ -10,7 +11,7 @@ function muatDropdowns() {
 
     kategoriDropdown.innerHTML = `<option value="" disabled selected>Pilih kategori</option>`;
     supplierDropdown.innerHTML = `<option value="" disabled selected>Pilih supplier</option>`;
-    kategoriDropdown.innerHTML = `<option value="" disabled selected>Pilih kategori</option>`;
+    itemDropdown.innerHTML = `<option value="" disabled selected>Pilih item</option>`;
     kategoriData.forEach((kategori) => {
         kategoriDropdown.innerHTML += `<option value="${kategori.id}">${kategori.nama}</option>`;
     });

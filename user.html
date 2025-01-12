@@ -25,6 +25,14 @@
                         <input type="text" class="form-control" id="namaUser" required>
                     </div>
                     <div class="mb-3">
+                        <label for="emailUser" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="emailUser" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordUser" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="passwordUser" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="peranUser" class="form-label">Peran</label>
                         <select class="form-select" id="peranUser" onchange="toggleOtherRoleInput()" required>
                             <option value="supAdmin">Super Admin</option>
@@ -75,9 +83,11 @@
                     <thead class="table-dark">
                         <tr>
                             <th>ID User</th>
-                            <th>Nama User</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Password (MD5)</th>
                             <th>Peran</th>
-                            <th>No Handphone</th>
+                            <th>No HP</th>
                             <th>Alamat</th>
                             <th>Status</th>
                             <th>Aksi</th>
@@ -88,6 +98,7 @@
             </div>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="js/user.js"></script>
 </body>
 </html>

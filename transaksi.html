@@ -1,125 +1,127 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaksi</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center"><i class="fas fa-shopping-cart"></i> Transaksi</h1>
+let keranjang = [];
+let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
+let pelangganData = JSON.parse(localStorage.getItem("pelangganData")) || [];
 
-        <!-- Form Transaksi -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <form id="formTransaksi">
-                    <div class="row g-3">
-                        <!-- Dropdown Peran -->
-                        <div class="col-md-3">
-                            <label for="peran" class="form-label">Peran Pelanggan</label>
-                            <select id="peran" class="form-select">
-                                <option value="Umum" selected>Umum</option>
-                                <option value="CosMem">CosMem</option>
-                                <option value="PelMem">PelMem</option>
-                            </select>
-                        </div>
+function muatDropdown() {
+    const pelangganDropdown = document.getElementById("pelanggan");
+    const produkDropdown = document.getElementById("produk");
 
-                        <!-- Input Pelanggan -->
-                        <div class="col-md-6">
-                            <label for="pelangganInput" class="form-label">Pelanggan</label>
-                            <input type="text" id="pelangganInput" class="form-control" placeholder="Masukkan ID/Nama Pelanggan">
-                        </div>
+    pelangganDropdown.innerHTML = `<option value="" disabled selected>Pilih pelanggan</option>`;
+    produkDropdown.innerHTML = `<option value="" disabled selected>Pilih produk</option>`;
 
-                        <!-- Tombol Filter -->
-                        <div class="col-md-3">
-                            <label class="form-label d-block">&nbsp;</label>
-                            <button type="button" id="filterPelanggan" class="btn btn-info w-100">
-                                <i class="fas fa-search"></i> Cari Pelanggan
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Form Produk dan Jumlah -->
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-4">
-                            <label for="produk" class="form-label">Produk</label>
-                            <select id="produk" class="form-select">
-                                <option value="" selected>Pilih Produk</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="jumlah" class="form-label">Jumlah</label>
-                            <input type="number" id="jumlah" class="form-control" min="1" placeholder="Masukkan Jumlah">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label d-block">&nbsp;</label>
-                            <button type="button" id="tambahKeranjang" class="btn btn-primary w-100">
-                                <i class="fas fa-cart-plus"></i> Tambah ke Keranjang
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+    pelangganData.forEach((pelanggan) => {
+        pelangganDropdown.innerHTML += `<option value="${pelanggan.id}">${pelanggan.nama}</option>`;
+    });
+
+    produkData.forEach((produk) => {
+        const stokInfo = produk.stok <= 5 ? " (Stok rendah)" : "";
+        produkDropdown.innerHTML += `<option value="${produk.id}">${produk.nama} - Rp${produk.harga}${stokInfo}</option>`;
+    });
+}
+
+// Filter produk berdasarkan pencarian
+document.getElementById("cariProduk").addEventListener("input", function () {
+    const keyword = this.value.toLowerCase();
+    const produkDropdown = document.getElementById("produk");
+
+    produkDropdown.innerHTML = `<option value="" disabled selected>Pilih produk</option>`;
+    produkData
+        .filter((produk) => produk.nama.toLowerCase().includes(keyword))
+        .forEach((produk) => {
+            produkDropdown.innerHTML += `<option value="${produk.id}">${produk.nama} - Rp${produk.harga}</option>`;
+        });
+});
+
+// Tambah ke keranjang dengan diskon
+document.getElementById("transaksiForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const produkId = document.getElementById("produk").value;
+    const jumlah = parseInt(document.getElementById("jumlah").value);
+    const diskon = parseInt(document.getElementById("diskon").value) || 0;
+
+    const produk = produkData.find((p) => p.id === produkId);
+
+    if (!produk || produk.stok < jumlah) {
+        tampilkanAlert("Stok tidak mencukupi!", "danger");
+        return;
+    }
+
+    const subtotal = produk.harga * jumlah * (1 - diskon / 100);
+
+    keranjang.push({
+        id: produk.id,
+        nama: produk.nama,
+        harga: produk.harga,
+        jumlah: jumlah,
+        diskon: diskon,
+        subtotal: subtotal,
+    });
+
+    tampilkanKeranjang();
+    document.getElementById("transaksiForm").reset();
+});
+
+// Tampilkan keranjang
+function tampilkanKeranjang() {
+    const keranjangTable = document.getElementById("keranjangTable");
+    keranjangTable.innerHTML = "";
+
+    let total = 0;
+    keranjang.forEach((item, index) => {
+        total += item.subtotal;
+        keranjangTable.innerHTML += `
+            <tr>
+                <td>${item.nama}</td>
+                <td>Rp${item.harga}</td>
+                <td>${item.jumlah}</td>
+                <td>${item.diskon}%</td>
+                <td>Rp${item.subtotal.toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="hapusKeranjang(${index})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("totalHarga").textContent = `Rp${total.toFixed(2)}`;
+}
+
+// Proses pembayaran
+document.getElementById("prosesPembayaran").addEventListener("click", function () {
+    if (keranjang.length === 0) {
+        tampilkanAlert("Keranjang kosong!", "danger");
+        return;
+    }
+
+    keranjang.forEach((item) => {
+        const produk = produkData.find((p) => p.id === item.id);
+        if (produk) {
+            produk.stok -= item.jumlah;
+        }
+    });
+
+    localStorage.setItem("produkData", JSON.stringify(produkData));
+    simpanLaporan(keranjang);
+    tampilkanAlert("Pembayaran berhasil diproses!", "success");
+    keranjang = [];
+    tampilkanKeranjang();
+});
+
+// Tampilkan alert
+function tampilkanAlert(message, type) {
+    const alertContainer = document.getElementById("alertContainer");
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+    `;
 
-        <!-- Keranjang -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5><i class="fas fa-list"></i> Keranjang Belanja</h5>
-                <table class="table table-bordered mt-3">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Produk</th>
-                            <th>Harga</th>
-                            <th>Jumlah</th>
-                            <th>Total</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="keranjangTable">
-                        <tr>
-                            <td colspan="5" class="text-center">Keranjang Kosong</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="text-end">
-                    <h5>Total Belanja: <span id="totalBelanja">Rp0</span></h5>
-                </div>
-            </div>
-        </div>
+    setTimeout(() => {
+        alertContainer.innerHTML = "";
+    }, 3000);
+}
 
-        <!-- Konfirmasi Transaksi -->
-        <div class="text-end mt-4">
-            <button class="btn btn-success" id="selesaikanTransaksi">
-                <i class="fas fa-check"></i> Selesaikan Transaksi
-            </button>
-        </div>
-
-        <!-- Riwayat Transaksi -->
-        <div class="card mt-5">
-            <div class="card-body">
-                <h5><i class="fas fa-history"></i> Riwayat Transaksi</h5>
-                <table class="table table-striped mt-3">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Tanggal</th>
-                            <th>Pelanggan</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="riwayatTransaksi">
-                        <tr>
-                            <td colspan="4" class="text-center">Belum ada transaksi</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <script src="js/transaksi.js"></script>
-</body>
-</html>
+muatDropdown();
+tampilkanKeranjang();

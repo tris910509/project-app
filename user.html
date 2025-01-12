@@ -3,45 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola User</title>
+    <title>Fitur User</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center mb-4"><i class="fas fa-users"></i> Kelola User</h1>
+        <h1 class="text-center"><i class="fas fa-users"></i> Kelola User</h1>
         <div id="alertContainer"></div>
-        <form id="userForm" class="mb-4">
-            <div class="mb-3">
-                <label for="username" class="form-label">Nama User</label>
-                <input type="text" class="form-control" id="username" placeholder="Masukkan nama user" required>
-            </div>
-            <div class="mb-3">
-                <label for="userRole" class="form-label">Peran</label>
-                <select class="form-select" id="userRole" required>
-                    <option value="" disabled selected>Pilih peran</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Kasir">Kasir</option>
-                    <option value="Operator">Operator</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> Tambah User</button>
-        </form>
-        <table class="table table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Nama</th>
-                    <th>Peran</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="userTable">
-                <!-- Data user akan ditampilkan di sini -->
-            </tbody>
-        </table>
-    </div>
 
+        <!-- Form User -->
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5>Form User</h5>
+            </div>
+            <div class="card-body">
+                <form id="userForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label for="namaUser" class="form-label">Nama User</label>
+                        <input type="text" class="form-control" id="namaUser" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="peranUser" class="form-label">Peran</label>
+                        <select class="form-select" id="peranUser" onchange="toggleOtherRoleInput()" required>
+                            <option value="supAdmin">Super Admin</option>
+                            <option value="perAdm">Admin Perusahaan</option>
+                            <option value="perKas">Kasir</option>
+                            <option value="perOther">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="otherRoleInputContainer" style="display: none;">
+                        <label for="otherRole" class="form-label">Peran Manual</label>
+                        <input type="text" class="form-control" id="otherRole">
+                    </div>
+                    <div class="mb-3">
+                        <label for="noHpUser" class="form-label">No Handphone</label>
+                        <input type="text" class="form-control" id="noHpUser" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="alamatUser" class="form-label">Alamat</label>
+                        <textarea class="form-control" id="alamatUser" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userSwitch" class="form-label">Status User</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="userSwitch">
+                            <label class="form-check-label" for="userSwitch">Aktif</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success" id="saveUserButton"><i class="fas fa-save"></i> Simpan User</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabel User -->
+        <div class="card mt-4">
+            <div class="card-header bg-secondary text-white">
+                <h5>Daftar User</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="filterUserStatus" class="form-label">Filter Status</label>
+                    <select id="filterUserStatus" class="form-select" onchange="filterUser()">
+                        <option value="">Semua</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                </div>
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID User</th>
+                            <th>Nama User</th>
+                            <th>Peran</th>
+                            <th>No Handphone</th>
+                            <th>Alamat</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <script src="js/user.js"></script>
 </body>
 </html>

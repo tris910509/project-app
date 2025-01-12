@@ -135,5 +135,7 @@ document.getElementById("searchProduk").addEventListener("input", function () {
     tampilkanProduk(this.value);
 });
 
+document.addEventListener("DOMContentLoaded", function () { muatDropdowns(); tampilkanProduk(); });
+
 muatDropdowns();
 tampilkanProduk();

@@ -27,8 +27,20 @@
                         <input type="text" class="form-control" id="namaPelanggan" required>
                     </div>
                     <div class="mb-3">
-                        <label for="idProduk" class="form-label">ID Produk</label>
-                        <input type="text" class="form-control" id="idProduk" placeholder="Masukkan ID Produk" required>
+                        <label for="peranPelanggan" class="form-label">Peran Pelanggan</label>
+                        <select class="form-select" id="peranPelanggan">
+                            <option value="Umum">Umum</option>
+                            <option value="cosPel">cosPel</option>
+                            <option value="cosMem">cosMem</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noHpPelanggan" class="form-label">No Handphone</label>
+                        <input type="text" class="form-control" id="noHpPelanggan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="alamatPelanggan" class="form-label">Alamat</label>
+                        <textarea class="form-control" id="alamatPelanggan" rows="2" required></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="diskonSwitch" class="form-label">Diskon</label>
@@ -47,8 +59,11 @@
                         <input type="number" class="form-control" id="nilaiDiskon" placeholder="Masukkan Nilai Diskon">
                     </div>
                     <div class="mb-3">
-                        <label for="hargaSetelahDiskon" class="form-label">Harga Setelah Diskon</label>
-                        <input type="text" class="form-control" id="hargaSetelahDiskon" readonly>
+                        <label for="statusPelanggan" class="form-label">Status</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="statusPelanggan">
+                            <label class="form-check-label" for="statusPelanggan">Aktif</label>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-success" id="savePelangganButton"><i class="fas fa-save"></i> Simpan Pelanggan</button>
                 </form>
@@ -61,13 +76,19 @@
                 <h5>Daftar Pelanggan</h5>
             </div>
             <div class="card-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="filterInput" placeholder="Filter Nama Pelanggan...">
+                </div>
                 <table class="table table-striped">
                     <thead class="table-dark">
                         <tr>
                             <th>ID Pelanggan</th>
                             <th>Nama Pelanggan</th>
-                            <th>ID Produk</th>
-                            <th>Harga Setelah Diskon</th>
+                            <th>Peran</th>
+                            <th>No HP</th>
+                            <th>Alamat</th>
+                            <th>Diskon</th>
+                            <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>

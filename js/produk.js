@@ -1,155 +1,120 @@
-let productIdCounter = JSON.parse(localStorage.getItem("productIdCounter")) || 1;
-let productData = JSON.parse(localStorage.getItem("productData")) || [];
-const categories = JSON.parse(localStorage.getItem("categories")) || [];
-const items = JSON.parse(localStorage.getItem("items")) || [];
-const suppliers = JSON.parse(localStorage.getItem("supplierData")) || [];
+let produkIdCounter = JSON.parse(localStorage.getItem("produkIdCounter")) || 1;
+let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
+const kategoriData = JSON.parse(localStorage.getItem("kategoriData")) || [];
+const itemData = JSON.parse(localStorage.getItem("itemData")) || [];
+const supplierData = JSON.parse(localStorage.getItem("supplierData")) || [];
 
 // Fungsi untuk menghasilkan ID unik produk
 function generateProductId() {
-    const id = `PROD-${productIdCounter++}`;
-    localStorage.setItem("productIdCounter", JSON.stringify(productIdCounter));
+    const id = `PROD-${produkIdCounter++}`;
+    localStorage.setItem("produkIdCounter", JSON.stringify(produkIdCounter));
     return id;
 }
 
 // Fungsi untuk menyimpan data produk ke LocalStorage
 function saveToLocalStorage() {
-    localStorage.setItem("productData", JSON.stringify(productData));
+    localStorage.setItem("produkData", JSON.stringify(produkData));
 }
 
-// Mengisi dropdown kategori, item, dan supplier
-function populateDropdowns() {
-    const categorySelect = document.getElementById("categorySelect");
-    const itemSelect = document.getElementById("itemSelect");
-    const supplierSelect = document.getElementById("supplierSelect");
 
-    // Populate kategori
-    categorySelect.innerHTML = '<option value="" disabled selected>Pilih Kategori</option>';
-    categories.forEach((cat) => {
-        categorySelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+// Load Dropdown Data
+function muatDropdowns() {
+    const kategoriDropdown = document.getElementById("kategori");
+    const itemDropdown = document.getElementById("item");
+    const supplierDropdown = document.getElementById("supplier");
+
+    kategoriDropdown.innerHTML = '<option value="" disabled selected>Pilih kategori</option>';
+    itemDropdown.innerHTML = '<option value="" disabled selected>Pilih item</option>';
+    supplierDropdown.innerHTML = '<option value="" disabled selected>Pilih supplier</option>';
+
+    kategoriData.forEach((kategori) => {
+        kategoriDropdown.innerHTML += `<option value="${kategori.id}">${kategori.nama}</option>`;
     });
 
-    // Populate item
-    itemSelect.innerHTML = '<option value="" disabled selected>Pilih Item</option>';
-    items.forEach((item) => {
-        itemSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+    itemData.forEach((item) => {
+        itemDropdown.innerHTML += `<option value="${item.id}">${item.nama}</option>`;
     });
 
-    // Populate supplier
-    supplierSelect.innerHTML = '<option value="" disabled selected>Pilih Supplier</option>';
-    suppliers.forEach((sup) => {
-        supplierSelect.innerHTML += `<option value="${sup.id}">${sup.nama}</option>`;
+    supplierData.forEach((supplier) => {
+        supplierDropdown.innerHTML += `<option value="${supplier.id}">${supplier.nama}</option>`;
     });
 }
 
-// Menangani Submit Form Produk
-document.getElementById("productForm").addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const id = document.getElementById("editProductId").value;
-    const name = document.getElementById("productName").value;
-    const categoryId = document.getElementById("categorySelect").value;
-    const category = categories.find((cat) => cat.id === categoryId).name;
-    const itemId = document.getElementById("itemSelect").value;
-    const item = items.find((item) => item.id === itemId).name;
-    const supplierId = document.getElementById("supplierSelect").value;
-    const supplier = suppliers.find((sup) => sup.id === supplierId).nama;
-    const price = document.getElementById("productPrice").value;
-    const stock = document.getElementById("productStock").value;
-
-    if (id) {
-        // Edit data
-        const productIndex = productData.findIndex((product) => product.id === id);
-        productData[productIndex] = { id, name, category, item, supplier, price, stock };
-        alertMessage("Produk berhasil diperbarui!", "success");
-    } else {
-        // Tambah data baru
-        const product = {
-            id: generateProductId(),
-            name,
-            category,
-            item,
-            supplier,
-            price,
-            stock,
-        };
-        productData.push(product);
-        alertMessage("Produk berhasil ditambahkan!", "success");
-    }
-
-    saveToLocalStorage();
-    tampilkanProduk();
-    this.reset();
-    document.getElementById("cancelEditButton").classList.add("d-none");
-    document.getElementById("formTitle").textContent = "Form Produk";
+// Hitung Harga Akhir
+document.getElementById("diskonTipe").addEventListener("change", function () {
+    document.getElementById("diskon").disabled = this.value === "";
+    hitungHargaAkhir();
 });
 
-// Menampilkan Data Produk
+document.getElementById("diskon").addEventListener("input", hitungHargaAkhir);
+document.getElementById("harga").addEventListener("input", hitungHargaAkhir);
+
+function hitungHargaAkhir() {
+    const harga = parseFloat(document.getElementById("harga").value) || 0;
+    const diskonTipe = document.getElementById("diskonTipe").value;
+    const diskon = parseFloat(document.getElementById("diskon").value) || 0;
+    let hargaAkhir = harga;
+
+    if (diskonTipe === "Rupiah") {
+        hargaAkhir = harga - diskon;
+    } else if (diskonTipe === "Persen") {
+        hargaAkhir = harga - (harga * diskon / 100);
+    }
+
+    document.getElementById("hargaAkhir").value = Math.max(hargaAkhir, 0);
+}
+
+// Simpan Produk
+document.getElementById("produkForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const produk = {
+        id: "PROD-" + Date.now(),
+        nama: document.getElementById("namaProduk").value,
+        kategoriId: document.getElementById("kategori").value,
+        itemId: document.getElementById("item").value,
+        supplierId: document.getElementById("supplier").value,
+        harga: parseFloat(document.getElementById("harga").value),
+        diskonTipe: document.getElementById("diskonTipe").value,
+        diskon: parseFloat(document.getElementById("diskon").value) || 0,
+        hargaAkhir: parseFloat(document.getElementById("hargaAkhir").value),
+        stok: parseInt(document.getElementById("stok").value),
+    };
+
+    produkData.push(produk);
+    tampilkanProduk();
+    this.reset();
+    document.getElementById("hargaAkhir").value = "";
+});
+
+// Tampilkan Produk
 function tampilkanProduk() {
-    const productTable = document.getElementById("productTable");
-    productTable.innerHTML = "";
-    productData.forEach((product) => {
-        productTable.innerHTML += `
+    const produkTable = document.getElementById("produkTable");
+    produkTable.innerHTML = "";
+
+    produkData.forEach((produk) => {
+        const kategori = kategoriData.find((k) => k.id === produk.kategoriId)?.nama || "Tidak Ditemukan";
+        const item = itemData.find((i) => i.id === produk.itemId)?.nama || "Tidak Ditemukan";
+        const supplier = supplierData.find((s) => s.id === produk.supplierId)?.nama || "Tidak Ditemukan";
+
+        produkTable.innerHTML += `
             <tr>
-                <td>${product.id}</td>
-                <td>${product.name}</td>
-                <td>${product.category}</td>
-                <td>${product.item}</td>
-                <td>${product.supplier}</td>
-                <td>${product.price}</td>
-                <td>${product.stock}</td>
+                <td>${produk.id}</td>
+                <td>${produk.nama}</td>
+                <td>${kategori}</td>
+                <td>${item}</td>
+                <td>Rp${produk.harga}</td>
+                <td>${produk.diskonTipe} ${produk.diskon}</td>
+                <td>Rp${produk.hargaAkhir}</td>
+                <td>${produk.stok}</td>
+                <td>${supplier}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editProduct('${product.id}')"><i class="fas fa-edit"></i> Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="hapusProduk('${product.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                    <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `;
-    });
-}
 
-// Menghapus Data Produk
-function hapusProduk(id) {
-    productData = productData.filter((product) => product.id !== id);
-    saveToLocalStorage();
-    tampilkanProduk();
-    alertMessage("Produk berhasil dihapus!", "danger");
-}
-
-// Mengedit Data Produk
-function editProduct(id) {
-    const product = productData.find((p) => p.id === id);
-
-    document.getElementById("editProductId").value = product.id;
-    document.getElementById("productName").value = product.name;
-    document.getElementById("categorySelect").value = categories.find((cat) => cat.name === product.category).id;
-    document.getElementById("itemSelect").value = items.find((item) => item.name === product.item).id;
-    document.getElementById("supplierSelect").value = suppliers.find((sup) => sup.nama === product.supplier).id;
-    document.getElementById("productPrice").value = product.price;
-    document.getElementById("productStock").value = product.stock;
-
-    document.getElementById("formTitle").textContent = "Edit Produk";
-    document.getElementById("cancelEditButton").classList.remove("d-none");
-}
-
-// Membatalkan Edit
-document.getElementById("cancelEditButton").addEventListener("click", function () {
-    document.getElementById("productForm").reset();
-    document.getElementById("editProductId").value = "";
-    document.getElementById("formTitle").textContent = "Form Produk";
-    this.classList.add("d-none");
-});
-
-// Menampilkan Alert
-function alertMessage(message, type) {
-    const alertContainer = document.getElementById("alertContainer");
-    alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>`;
-    setTimeout(() => {
-        alertContainer.innerHTML = "";
-    }, 3000);
-}
-
-// Inisialisasi
-populateDropdowns();
+        
+muatDropdowns();   
 tampilkanProduk();

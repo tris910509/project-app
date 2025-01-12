@@ -8,74 +8,67 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center"><i class="fas fa-truck"></i> Kelola Supplier</h1>
-
-        <!-- Alert -->
-        <div id="alertContainer"></div>
-
-        <!-- Form Supplier -->
-        <div class="card mt-4">
-            <div class="card-header bg-primary text-white">
-                <h5>Form Supplier</h5>
-            </div>
-            <div class="card-body">
-                <form id="supplierForm">
-                    <input type="hidden" id="editSupplierId">
-                    <div class="mb-3">
-                        <label for="namaSupplier" class="form-label">Nama Supplier</label>
-                        <input type="text" class="form-control" id="namaSupplier" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="noHpSupplier" class="form-label">No Handphone</label>
-                        <input type="text" class="form-control" id="noHpSupplier" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="namaPerusahaan" class="form-label">Nama Perusahaan</label>
-                        <input type="text" class="form-control" id="namaPerusahaan" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="alamatSupplier" class="form-label">Alamat</label>
-                        <textarea class="form-control" id="alamatSupplier" rows="2" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="statusSupplier" class="form-label">Status</label>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="statusSupplier">
-                            <label class="form-check-label" for="statusSupplier">Aktif</label>
+<div class="container mt-4">
+    <h2>Manajemen Supplier</h2>
+    <div class="card">
+        <div class="card-header">Formulir Supplier</div>
+        <div class="card-body">
+            <form id="formSupplier">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="namaSupplier" class="form-label">Nama Supplier</label>
+                            <input type="text" id="namaSupplier" class="form-control" placeholder="Nama Supplier" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="noHandphone" class="form-label">No Handphone</label>
+                            <input type="text" id="noHandphone" class="form-control" placeholder="No Handphone" required>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-success" id="saveSupplierButton"><i class="fas fa-save"></i> Simpan Supplier</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Tabel Supplier -->
-        <div class="card mt-4">
-            <div class="card-header bg-secondary text-white">
-                <h5>Daftar Supplier</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="filterInput" placeholder="Filter Nama Supplier...">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="namaPerusahaan" class="form-label">Nama Perusahaan</label>
+                            <input type="text" id="namaPerusahaan" class="form-control" placeholder="Nama Perusahaan" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="alamatSupplier" class="form-label">Alamat</label>
+                            <textarea id="alamatSupplier" class="form-control" placeholder="Alamat Supplier" required></textarea>
+                        </div>
+                    </div>
                 </div>
-                <table class="table table-striped">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID Supplier</th>
-                            <th>Nama Supplier</th>
-                            <th>No HP</th>
-                            <th>Perusahaan</th>
-                            <th>Alamat</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="supplierTable"></tbody>
-                </table>
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Status Aktif</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="statusAktif" checked>
+                        <label class="form-check-label" for="statusAktif">Aktif</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="reset" class="btn btn-secondary">Reset</button>
+            </form>
         </div>
     </div>
+    <div class="card mt-4">
+        <div class="card-header">Daftar Supplier</div>
+        <div class="card-body">
+            <table class="table table-bordered" id="tabelSupplier">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nama Supplier</th>
+                        <th>No Handphone</th>
+                        <th>Nama Perusahaan</th>
+                        <th>Alamat</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
     <script src="js/supplier.js"></script>
 </body>
 </html>

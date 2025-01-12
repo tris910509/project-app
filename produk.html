@@ -1,80 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitur Produk</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center"><i class="fas fa-boxes"></i> Kelola Produk</h1>
-
-        <!-- Alert -->
-        <div id="alertContainer"></div>
-
-        <!-- Form Produk -->
-        <div class="card mt-4">
-            <div class="card-header bg-primary text-white">
-                <h5>Form Produk</h5>
+<div class="container mt-4">
+    <h2>Fitur Produk</h2>
+    
+    <!-- Form Tambah/Edit Produk -->
+    <div class="card p-3 mb-4">
+        <h4>Form Produk</h4>
+        <form id="formProduk">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="namaProduk" class="form-label">Nama Produk</label>
+                    <input type="text" id="namaProduk" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="kategoriProduk" class="form-label">Kategori</label>
+                    <select id="kategoriProduk" class="form-select" required>
+                        <option value="">Pilih Kategori</option>
+                    </select>
+                </div>
             </div>
-            <div class="card-body">
-                <form id="produkForm">
-                    <input type="hidden" id="editProdukId">
-                    <div class="mb-3">
-                        <label for="namaProduk" class="form-label">Nama Produk</label>
-                        <input type="text" class="form-control" id="namaProduk" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="kategoriProduk" class="form-label">Kategori</label>
-                        <select class="form-select" id="kategoriProduk" required></select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="itemProduk" class="form-label">Item</label>
-                        <select class="form-select" id="itemProduk" required></select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="supplierProduk" class="form-label">Supplier</label>
-                        <select class="form-select" id="supplierProduk" required></select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="hargaProduk" class="form-label">Harga</label>
-                        <input type="number" class="form-control" id="hargaProduk" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="stokProduk" class="form-label">Stok</label>
-                        <input type="number" class="form-control" id="stokProduk" required>
-                    </div>
-                    <button type="submit" class="btn btn-success" id="saveProdukButton"><i class="fas fa-save"></i> Simpan Produk</button>
-                </form>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="itemProduk" class="form-label">Item</label>
+                    <select id="itemProduk" class="form-select" required>
+                        <option value="">Pilih Item</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="supplierProduk" class="form-label">Supplier</label>
+                    <select id="supplierProduk" class="form-select" required>
+                        <option value="">Pilih Supplier</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="hargaProduk" class="form-label">Harga</label>
+                    <input type="number" id="hargaProduk" class="form-control" min="0" required>
+                </div>
             </div>
-        </div>
-
-        <!-- Tabel Produk -->
-        <div class="card mt-4">
-            <div class="card-header bg-secondary text-white">
-                <h5>Daftar Produk</h5>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="stokProduk" class="form-label">Stok</label>
+                    <input type="number" id="stokProduk" class="form-control" min="0" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="diskonSwitch" class="form-label">Aktifkan Diskon</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="diskonSwitch">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="tipeDiskon" class="form-label">Jenis Diskon</label>
+                    <select id="tipeDiskon" class="form-select" disabled>
+                        <option value="rupiah">Rupiah</option>
+                        <option value="persen">Persen</option>
+                    </select>
+                </div>
             </div>
-            <div class="card-body">
-                <table class="table table-striped">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID Produk</th>
-                            <th>Nama Produk</th>
-                            <th>Kategori</th>
-                            <th>Item</th>
-                            <th>Supplier</th>
-                            <th>Harga</th>
-                            <th>Stok</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="produkTable"></tbody>
-                </table>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="nilaiDiskon" class="form-label">Nilai Diskon</label>
+                    <input type="number" id="nilaiDiskon" class="form-control" min="0" disabled>
+                </div>
+                <div class="col-md-4">
+                    <label for="hargaDiskon" class="form-label">Harga Setelah Diskon</label>
+                    <input type="text" id="hargaDiskon" class="form-control" disabled>
+                </div>
             </div>
-        </div>
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">Simpan Produk</button>
+            </div>
+        </form>
     </div>
-    <script src="js/produk.js"></script>
-</body>
-</html>
+
+    <!-- Tabel Produk -->
+    <div class="card p-3">
+        <h4>Daftar Produk</h4>
+        <table class="table table-bordered" id="tabelProduk">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Produk</th>
+                    <th>Kategori</th>
+                    <th>Item</th>
+                    <th>Supplier</th>
+                    <th>Harga</th>
+                    <th>Stok</th>
+                    <th>Harga Diskon</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>

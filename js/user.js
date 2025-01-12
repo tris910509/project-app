@@ -34,9 +34,14 @@ document.getElementById("userForm").addEventListener("submit", function (e) {
         ? document.getElementById("otherRole").value
         : document.getElementById("peranUser").options[document.getElementById("peranUser").selectedIndex].text;
 
+    const passwordRaw = document.getElementById("passwordUser").value;
+    const passwordHash = CryptoJS.MD5(passwordRaw).toString();
+
     const user = {
         id: editUserId || generateUserId(),
         nama: document.getElementById("namaUser").value,
+        email: document.getElementById("emailUser").value,
+        password: passwordHash,
         peran: peran,
         noHp: document.getElementById("noHpUser").value,
         alamat: document.getElementById("alamatUser").value,
@@ -67,6 +72,8 @@ function tampilkanUser() {
             <tr>
                 <td>${user.id}</td>
                 <td>${user.nama}</td>
+                <td>${user.email}</td>
+                <td>${user.password}</td>
                 <td>${user.peran}</td>
                 <td>${user.noHp}</td>
                 <td>${user.alamat}</td>
@@ -91,6 +98,8 @@ function filterUser() {
             <tr>
                 <td>${user.id}</td>
                 <td>${user.nama}</td>
+                <td>${user.email}</td>
+                <td>${user.password}</td>
                 <td>${user.peran}</td>
                 <td>${user.noHp}</td>
                 <td>${user.alamat}</td>
@@ -118,8 +127,9 @@ function editUser(index) {
     const user = userData[index];
     document.getElementById("editUserId").value = user.id;
     document.getElementById("namaUser").value = user.nama;
-    document.getElementById("noHpUser").value = user.noHp;
+    document.getElementById("emailUser").value = user.email;
     document.getElementById("alamatUser").value = user.alamat;
+    document.getElementById("noHpUser").value = user.noHp;
     document.getElementById("userSwitch").checked = user.status === "Aktif";
     if (["Super Admin", "Admin Perusahaan", "Kasir"].includes(user.peran)) {
         document.getElementById("peranUser").value = user.peran.toLowerCase();

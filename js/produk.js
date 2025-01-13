@@ -1,7 +1,7 @@
 let produkData = JSON.parse(localStorage.getItem("produkData")) || [];
 
 // Muat Kategori dan Supplier ke Dropdown
-function muatKategoriSupplier() {
+function muatProduk() {
     const kategoriDropdown = document.getElementById("kategoriProduk");
     const supplierDropdown = document.getElementById("supplierProduk");
 
@@ -99,5 +99,5 @@ function tampilkanAlert(message, type) {
 }
 
 // Muat data saat halaman pertama kali dimuat
-muatKategoriSupplier();
+muatProduk();
 tampilkanProduk();
